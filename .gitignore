@@ -1,0 +1,46 @@
+client/.DS_Store
+client/node_modules
+client/docs/.vitepress/cache
+client/src/game/phaser/admin.js
+
+
+# local env files
+client/.env.local
+client/.env.*.local
+client/TODO.txt
+
+# Log files
+server/npm-debug.log*
+server/yarn-debug.log*
+server/yarn-error.log*
+server/pnpm-debug.log*
+
+server/.DS_Store
+server/node_modules
+server/dist
+server/cert
+server/logs
+server/src/api/spaceStrikerSecret.js
+
+
+
+# local env files
+server/.env.local
+server/.env.*.local
+
+# Log files
+server/npm-debug.log*
+server/yarn-debug.log*
+server/yarn-error.log*
+server/pnpm-debug.log*
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+COMMANDS.txt
