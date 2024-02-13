@@ -2,11 +2,11 @@ const { Contract, Provider, utils } = require("koilib");
 const klashAbi = require("../../client/src/utils/abi/klash-abi.json");
 const { Client } = require("koinos-rpc");
 
-module.exports = async function (Server) {
-  Server.PROVIDERS_URL = [
-    "https://api.koinos.io",
-    "https://api.koinosblocks.com",
-  ];
+module.exports = function (Server) {
+  Server.PROVIDERS_URL = process.env.TEST
+    ? ["https://harbinger-api.koinos.io"]
+    : ["https://api.koinos.io", "https://api.koinosblocks.com"];
+  Server.infoLogging("Intialied providers", Server.PROVIDERS_URL);
   Server.provider = new Provider(Server.PROVIDERS_URL); // koilib
   Server.client = new Client(Server.PROVIDERS_URL); // koinos-rpc
 
@@ -15,12 +15,14 @@ module.exports = async function (Server) {
     id: Server.klashContractAddress,
     abi: klashAbi,
     provider: Server.provider,
-  }).functions;
+  });
 
   Server.initKoinContractWithSigner = (signer) => {
     signer.provider = Server.provider;
     return new Contract({
-      id: "15DJN4a8SgrbGhhGksSBASiSYjGnMU8dGL",
+      id: process.env.TEST
+        ? "1FaSvLjQJsCJKq5ybmGsMMQs8RQYyVv8ju"
+        : "15DJN4a8SgrbGhhGksSBASiSYjGnMU8dGL",
       abi: utils.tokenAbi,
       provider: Server.provider,
       signer: signer,

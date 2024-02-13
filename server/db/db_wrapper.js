@@ -5,9 +5,9 @@ class DbWrapper {
     this.server = Server;
     this.db = new sqlite3.Database(dbFilePath, (err) => {
       if (err) {
-        this.server.errorLogging("Could not connect to database", err);
+        this.server.errorLogging("SQL", "Could not connect to database", err);
       } else {
-        this.server.infoLogging("Connected to database");
+        this.server.infoLogging("SQL", "Connected to database");
       }
     });
   }
@@ -15,10 +15,10 @@ class DbWrapper {
   run(sql, params = []) {
     let Server = this.server;
     return new Promise((resolve, reject) => {
+      Server.infoLogging("SQL", "run", sql, ...params);
       this.db.run(sql, params, function (err) {
         if (err) {
-          Server.errorLogging("Error running sql " + sql);
-          Server.errorLogging(err);
+          Server.errorLogging("SQL", "run", err);
           reject(err);
         } else {
           resolve({ id: this.lastID });
@@ -30,10 +30,10 @@ class DbWrapper {
   get(sql, params = []) {
     let Server = this.server;
     return new Promise((resolve, reject) => {
+      Server.infoLogging("SQL", "get", sql, ...params);
       this.db.get(sql, params, (err, result) => {
         if (err) {
-          Server.errorLogging("Error running sql: " + sql);
-          Server.errorLogging(err);
+          Server.errorLogging("SQL", "get", err);
           reject(err);
         } else {
           resolve(result);
@@ -45,10 +45,10 @@ class DbWrapper {
   all(sql, params = []) {
     let Server = this.server;
     return new Promise((resolve, reject) => {
+      Server.infoLogging("SQL", "all", sql, ...params);
       this.db.all(sql, params, (err, rows) => {
         if (err) {
-          Server.errorLogging("Error running sql: " + sql);
-          Server.errorLogging(err);
+          Server.errorLogging("SQL", "all", err);
           reject(err);
         } else {
           resolve(rows);

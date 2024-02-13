@@ -1,6 +1,7 @@
 import { createStore as createVuexStore } from "vuex";
 import { getKlashContract } from "../utils/contracts";
 import CryptoJS from "crypto-js";
+import { sha256 } from "js-sha256";
 import * as kondor from "kondor-js";
 
 export const createStore = (app) => {
@@ -13,8 +14,27 @@ export const createStore = (app) => {
         window.localStorage.getItem("klash-wallets") || "[]"
       ),
       addressesData: {},
+      currentTournament: null,
+      currentMatch: null,
+      signPlayed: null,
+      hashingSeed: null,
+      tempHashingSeed: null,
+      tempSignPlayed: null,
     },
     getters: {
+      localStorageKey: (state) => {
+        return (
+          state.currentMatch.tournament_id +
+          "-" +
+          state.currentMatch.round_number +
+          "-" +
+          state.currentMatch.score_1 +
+          "-" +
+          state.currentMatch.score_2 +
+          "-" +
+          state.activeAccount.address
+        );
+      },
       getWalletAsStoredFormat: () => {
         return function (wallet) {
           let storedWallet;
@@ -39,9 +59,74 @@ export const createStore = (app) => {
           return storedWallet;
         };
       },
+      hashedSign: () => {
+        return function (sign, seed) {
+          let strToHash = sign.toString() + seed.toString();
+          let hashedBytes = sha256.digest(strToHash);
+          hashedBytes = [18, 32, ...hashedBytes];
+
+          // Convert the bytes to a hex string
+          let hex = "";
+          for (let i = 0; i < hashedBytes.length; i++) {
+            hex += hashedBytes[i].toString(16);
+          }
+
+          return hex;
+        };
+      },
     },
-    mutations: {},
+    mutations: {
+      setCurrentTournament(state, tournament) {
+        state.currentTournament = tournament;
+      },
+      addPlayerToCurrentTournament(state, player) {
+        state.currentTournament.players.push(player);
+      },
+    },
     actions: {
+      setCurrentMatch({ state, getters }, match) {
+        state.currentMatch = match;
+        state.hashingSeed = window.localStorage.getItem(
+          "klash-hashingSeed-" + getters.localStorageKey
+        );
+        state.signPlayed = window.localStorage.getItem(
+          "klash-signPlayed-" + getters.localStorageKey
+        );
+        state.tempHashingSeed = window.localStorage.getItem(
+          "klash-tempHashingSeed-" + getters.localStorageKey
+        );
+        state.tempSignPlayed = window.localStorage.getItem(
+          "klash-tempSignPlayed-" + getters.localStorageKey
+        );
+      },
+      setHashingSeed({ state, getters }, seed) {
+        state.hashingSeed = seed;
+        window.localStorage.setItem(
+          "klash-hashingSeed-" + getters.localStorageKey,
+          seed
+        );
+      },
+      setTempHashingSeed({ state, getters }, seed) {
+        state.tempHashingSeed = seed;
+        window.localStorage.setItem(
+          "klash-tempHashingSeed-" + getters.localStorageKey,
+          seed
+        );
+      },
+      setSignPlayed({ state, getters }, signPlayed) {
+        state.signPlayed = signPlayed;
+        window.localStorage.setItem(
+          "klash-signPlayed-" + getters.localStorageKey,
+          signPlayed
+        );
+      },
+      setTempSignPlayed({ state, getters }, signPlayed) {
+        state.tempSignPlayed = signPlayed;
+        window.localStorage.setItem(
+          "klash-tempSignPlayed-" + getters.localStorageKey,
+          signPlayed
+        );
+      },
       async unlockWallet({ state, dispatch }, { name, password }) {
         let encryptedWallet =
           state.walletsList[
@@ -111,6 +196,14 @@ export const createStore = (app) => {
         window.localStorage.setItem("klash-lastWallet", newActiveWallet.name);
       },
       async setActiveAccount({ state }, newActiveAccount) {
+        // Unlink the previous account if there is one
+        if (
+          state.activeAccount &&
+          state.activeAccount.address != newActiveAccount.address
+        ) {
+          app.config.globalProperties.$socket.emit("unlink_socket_to_address");
+        }
+
         state.activeAccount = newActiveAccount;
 
         if (!state.addressesData[newActiveAccount.address])
@@ -130,7 +223,7 @@ export const createStore = (app) => {
         state.klashContract = getKlashContract(newSigner);
 
         app.config.globalProperties.$socket.emit(
-          "subscribe_wallet_update",
+          "link_socket_to_address",
           newActiveAccount.address
         );
       },
@@ -165,7 +258,12 @@ export const createStore = (app) => {
           JSON.stringify(state.walletsList)
         );
       },
-      signOut({ state }) {
+      signOut({ state, commit }) {
+        // Unlink the previous account if there is one
+        if (state.activeAccount) {
+          app.config.globalProperties.$socket.emit("unlink_socket_to_address");
+        }
+        commit("setCurrentMatch", null);
         state.activeWallet = null;
         state.activeAccount = null;
       },

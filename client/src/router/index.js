@@ -6,6 +6,10 @@ const routes = [
     path: "/",
     component: MainView,
   },
+  {
+    path: "/match",
+    component: () => import("../views/MatchView.vue"),
+  },
 ];
 
 const router = createRouter({

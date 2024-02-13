@@ -23,3 +23,8 @@ body {
 .mosha__toast__content__description {
   font-size: 16px !important;
 }
+
+.inactive-btn:hover {
+  background: transparent;
+  color: var(--fallback-bc, oklch(var(--bc) / var(--tw-text-opacity)));
+}

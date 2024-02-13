@@ -1,13 +1,40 @@
+const {
+  tournamentCreated,
+  playerSignedUp,
+  tournamentStarted,
+  signPlayed,
+  signVerified,
+  matchRoundFinished,
+} = require("./events");
+
 module.exports = async function (Server) {
-  const BLOCKS_PROCESSING_INTERVAL = 1000;
+  const BLOCKS_PROCESSING_INTERVAL =
+    process.env.BLOCKS_PROCESSING_INTERVAL || 1000;
+  let CURRENT_TEST_BLOCK_HEIGHT = 0;
 
   let processKlashEvents = async function (decodedEvent, txId) {
-    // TODO
-    /**
-     * Example of use to process events
-     * if (decodedEvent.name == "klashcontract.transfer_event") {
-     * let eventArgs = decodedEvent.args;
-     */
+    switch (decodedEvent.name) {
+      case "klash.tournament_created_event":
+        await tournamentCreated(Server, decodedEvent.args);
+        break;
+      case "klash.player_signed_up_event":
+        await playerSignedUp(Server, decodedEvent.args);
+        break;
+      case "klash.tournament_started_event":
+        await tournamentStarted(Server, decodedEvent.args);
+        break;
+      case "klash.sign_played_event":
+        await signPlayed(Server, decodedEvent.args);
+        break;
+      case "klash.sign_verified_event":
+        await signVerified(Server, decodedEvent.args);
+        break;
+      case "klash.match_round_finished_event":
+        await matchRoundFinished(Server, decodedEvent.args);
+        break;
+      default:
+        break;
+    }
   };
 
   const PROCESSING_EVENTS_ROUTER = [
@@ -25,7 +52,7 @@ module.exports = async function (Server) {
           event
         );
         await processingEventRouter.processingFunction(decodedEvent, txId);
-        Server.infoLogging("Processed event", txId, eventDecoded.name);
+        Server.infoLogging("Processed event", txId, decodedEvent.name);
         return;
       }
     }
@@ -62,8 +89,24 @@ module.exports = async function (Server) {
   let lastBlockHeight = Number(
     (await Server.client.blockStore.getHighestBlock()).topology.height
   );
+
+  if (process.env.PREDEFINED_BLOCKS_TESTING) {
+    await require("./test")(Server);
+  }
   setInterval(async () => {
-    if (Server.TEST_ENV) return true;
+    // Testing if there are predefined blocks to process
+    if (process.env.PREDEFINED_BLOCKS_TESTING) {
+      if (CURRENT_TEST_BLOCK_HEIGHT >= Server.BLOCKS_TO_PROCESS_IDS.length)
+        return;
+      await processBlocks([
+        require("../logs/test_blocks/" +
+          Server.BLOCKS_TO_PROCESS_IDS[CURRENT_TEST_BLOCK_HEIGHT] +
+          ".json"),
+      ]);
+      CURRENT_TEST_BLOCK_HEIGHT++;
+      return;
+    }
+
     try {
       let newBlock = (await Server.client.blockStore.getHighestBlock())
         .topology;

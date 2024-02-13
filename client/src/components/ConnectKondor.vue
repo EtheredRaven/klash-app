@@ -132,9 +132,4 @@
   };
 </script>
 
-<style>
-  .inactive-btn:hover {
-    background: transparent;
-    color: var(--fallback-bc, oklch(var(--bc) / var(--tw-text-opacity)));
-  }
-</style>
+<style></style>

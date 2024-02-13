@@ -29,10 +29,18 @@ export default {
           showIcon: true,
           position: "bottom-right",
           type: "success",
-          timeout: 60000,
+          timeout: 4000,
           showCloseButton: false,
         }
       );
+    app.config.globalProperties.$transactionInfo = (title, transaction) =>
+      app.config.globalProperties.$info(
+        "Check transaction on <a target='_blank' href='https://koinosblocks.com/tx/" +
+          transaction.id +
+          "' style='color:white'>Koinos blocks</a>",
+        title
+      );
+
     app.config.globalProperties.$warning = (description, title) =>
       createToast(
         { title, description },

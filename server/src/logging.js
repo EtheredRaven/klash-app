@@ -34,7 +34,7 @@ module.exports = function (Server) {
     let separator = " - ";
     let log = new Date().toUTCString() + separator;
     args.forEach((arg) => {
-      log += arg.toString() + separator;
+      log += (arg != null ? arg.toString() : "null") + separator;
     });
     console.log(log);
   };

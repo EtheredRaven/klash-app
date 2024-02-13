@@ -406,9 +406,16 @@
                 "type": "uint64",
                 "id": 2
               },
-              "randomSeed": {
+              "randomSeed_1": {
                 "type": "uint64",
                 "id": 3,
+                "options": {
+                  "jstype": "JS_STRING"
+                }
+              },
+              "randomSeed_2": {
+                "type": "uint64",
+                "id": 4,
                 "options": {
                   "jstype": "JS_STRING"
                 }
@@ -467,6 +474,13 @@
                 "options": {
                   "(koinos.btype)": "ADDRESS"
                 }
+              },
+              "tournamentId": {
+                "type": "uint64",
+                "id": 2,
+                "options": {
+                  "jstype": "JS_STRING"
+                }
               }
             }
           },
@@ -501,6 +515,24 @@
                 "options": {
                   "jstype": "JS_STRING"
                 }
+              },
+              "round": {
+                "type": "uint64",
+                "id": 4,
+                "options": {
+                  "jstype": "JS_STRING"
+                }
+              },
+              "tournamentId": {
+                "type": "uint64",
+                "id": 5,
+                "options": {
+                  "jstype": "JS_STRING"
+                }
+              },
+              "isPlayer1": {
+                "type": "bool",
+                "id": 6
               }
             }
           },
@@ -526,6 +558,24 @@
                 "options": {
                   "jstype": "JS_STRING"
                 }
+              },
+              "round": {
+                "type": "uint64",
+                "id": 4,
+                "options": {
+                  "jstype": "JS_STRING"
+                }
+              },
+              "tournamentId": {
+                "type": "uint64",
+                "id": 5,
+                "options": {
+                  "jstype": "JS_STRING"
+                }
+              },
+              "isPlayer1": {
+                "type": "bool",
+                "id": 6
               }
             }
           },
@@ -567,6 +617,13 @@
                 "options": {
                   "jstype": "JS_STRING"
                 }
+              },
+              "tournamentId": {
+                "type": "uint64",
+                "id": 3,
+                "options": {
+                  "jstype": "JS_STRING"
+                }
               }
             }
           },
@@ -582,6 +639,13 @@
               "timestamp": {
                 "type": "uint64",
                 "id": 2,
+                "options": {
+                  "jstype": "JS_STRING"
+                }
+              },
+              "tournamentId": {
+                "type": "uint64",
+                "id": 3,
                 "options": {
                   "jstype": "JS_STRING"
                 }
@@ -611,6 +675,13 @@
                 "options": {
                   "jstype": "JS_STRING"
                 }
+              },
+              "tournamentId": {
+                "type": "uint64",
+                "id": 3,
+                "options": {
+                  "jstype": "JS_STRING"
+                }
               }
             }
           },
@@ -626,6 +697,13 @@
               "round": {
                 "type": "uint64",
                 "id": 2,
+                "options": {
+                  "jstype": "JS_STRING"
+                }
+              },
+              "tournamentId": {
+                "type": "uint64",
+                "id": 3,
                 "options": {
                   "jstype": "JS_STRING"
                 }

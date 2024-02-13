@@ -62,4 +62,5 @@
 
   require("./src/socket")(Server);
   require("./src/processBlocks")(Server);
+  require("./src/initData")(Server);
 })();
