@@ -1,19 +1,50 @@
-const Constants = require("../constants");
-
 module.exports = async function (Server, eventArgs) {
-  const { player, signHash, timestamp, round, tournamentId, isPlayer1 } =
-    eventArgs;
+  const { isPlayer1, match } = eventArgs;
+  const {
+    player1,
+    player2,
+    score1,
+    score2,
+    winner,
+    round,
+    tournamentId,
+    sign1,
+    sign2,
+  } = match;
+  const player1Address = player1.address;
+  const lastActionTimestamp1 = player1.lastActionTimestamp;
+  const player2Address = player2.address;
+  const lastActionTimestamp2 = player2.lastActionTimestamp;
+  const player1Sign = sign1?.sign;
+  const player1SignHash = sign1?.signHash;
+  const player2Sign = sign2?.sign;
+  const player2SignHash = sign2?.signHash;
 
-  let playerNumber = isPlayer1 ? 1 : 2;
   await Server.db.run(
-    `UPDATE matches SET sign_${playerNumber} = ?, sign_hash_${playerNumber} = ?, last_action_timestamp_${playerNumber} = ? WHERE tournament_id = ? AND player_${playerNumber} = ? AND round_number = ?`,
-    [Constants.UNKNOWN_SIGN, signHash, timestamp, tournamentId, player, round]
+    `UPDATE matches SET player_1 = ?, player_2 = ?, score_1 = ?, score_2 = ?, winner = ?, last_action_timestamp_1 = ?, last_action_timestamp_2 = ?, sign_1 = ?, sign_hash_1 = ?, sign_2 = ?, sign_hash_2 = ? WHERE tournament_id = ? AND round_number = ? AND player_1 = ? AND player_2 = ?`,
+    [
+      player1Address,
+      player2Address,
+      score1,
+      score2,
+      winner,
+      lastActionTimestamp1,
+      lastActionTimestamp2,
+      player1Sign,
+      player1SignHash,
+      player2Sign,
+      player2SignHash,
+      tournamentId,
+      round,
+      player1Address,
+      player2Address,
+    ]
   );
   let updatedMatch = await Server.db.get(
-    `SELECT * FROM matches WHERE tournament_id = ? AND player_${playerNumber} = ? AND round_number = ?`,
-    [tournamentId, player, round]
+    `SELECT * FROM matches WHERE tournament_id = ? AND round_number = ? AND player_1 = ? AND player_2 = ?`,
+    [tournamentId, round, player1Address, player2Address]
   );
 
-  await Server.updateCurrentTournamentFromDb(); // TODO - only update the match
+  await Server.updateCurrentTournamentFromDb();
   Server.emitSignPlayed(updatedMatch, isPlayer1);
 };

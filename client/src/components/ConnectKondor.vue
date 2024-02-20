@@ -93,6 +93,8 @@
 </template>
 
 <script>
+  import { shortenAddress } from "../utils/formatting";
+
   export default {
     computed: {
       activeAccountAddress: function () {
@@ -115,11 +117,9 @@
       },
     },
     methods: {
+      shortenAddress,
       connectToKondor() {
         this.$store.dispatch("linkKondor");
-      },
-      shortenAddress: function (addr) {
-        return addr.substr(0, 10) + "..." + addr.slice(-5);
       },
       copyAddress() {
         navigator.clipboard.writeText(this.activeAccountAddress);

@@ -4,7 +4,14 @@
       <ConnectKondor />
     </div>
     <div class="h-screen flex items-center justify-center flex-col">
-      <div v-if="currentMatch">
+      <div
+        v-if="
+          currentMatch &&
+          (currentMatch.player_1 == activeAccountAddress ||
+            currentMatch.player_2 == activeAccountAddress ||
+            currentMatch.waiting)
+        "
+      >
         <MatchView />
       </div>
       <div v-else>
@@ -29,6 +36,9 @@
       currentMatch() {
         return this.$store.state.currentMatch;
       },
+      activeAccountAddress: function () {
+        return this.$store.state.activeAccount?.address;
+      },
     },
     created() {
       this.$socket.on("tournament_created", (tournament) => {
@@ -39,6 +49,15 @@
       });
       this.$socket.on("match_created", (match) => {
         this.$store.dispatch("setCurrentMatch", match);
+      });
+      this.$socket.on("player_waiting", () => {
+        this.$info(
+          "Waiting for your next opponent... Stay online!",
+          "Please wait"
+        );
+        this.$store.dispatch("setCurrentMatch", {
+          waiting: true,
+        });
       });
       this.$socket.on("sign_played", (isUser, match) => {
         this.$store.dispatch("setCurrentMatch", match);
@@ -59,6 +78,17 @@
 
       this.$socket.on("match_round_finished", (match) => {
         this.$store.dispatch("setCurrentMatch", match);
+      });
+
+      this.$socket.on("match_finished", (match) => {
+        this.$store.dispatch("setCurrentMatch", match);
+      });
+
+      this.$socket.on("tournament_finished", (tournament) => {
+        if (tournament.winner == this.$store.state.activeAccount?.address) {
+          this.$info("You won the tournament!", "Congratulations!");
+        }
+        this.$store.commit("setCurrentTournament", tournament);
       });
 
       // TODO : player waiting, round started

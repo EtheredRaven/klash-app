@@ -19,3 +19,7 @@ export function formatChainError(err) {
   error = error.charAt(0).toUpperCase() + error.slice(1);
   return error.toString();
 }
+
+export function shortenAddress(addr) {
+  return addr.substr(0, 10) + "..." + addr.slice(-5);
+}

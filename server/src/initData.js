@@ -17,14 +17,21 @@ module.exports = async function (Server) {
       [Server.currentTournament.id]
     );
 
-    await Promise.all(
-      Server.currentTournament.rounds.map(async (round) => {
-        round.matches = await Server.db.all(
+    Server.currentTournament.currentRound = 0;
+    let matches = {};
+
+    for (const round of Server.currentTournament.rounds) {
+      if (
+        round.round_number >= Server.currentTournament.currentRound &&
+        round.start_timestamp > 0
+      ) {
+        Server.currentTournament.currentRound = round.round_number;
+        matches = await Server.db.all(
           "SELECT * FROM matches WHERE round_number = ? AND tournament_id = ?",
           [round.round_number, Server.currentTournament.id]
         );
 
-        round.matches.forEach((match) => {
+        matches.forEach((match) => {
           if (process.env.PREDEFINED_BLOCKS_TESTING) {
             let now = new Date();
             let UTCTimestamp = Date.UTC(
@@ -45,13 +52,21 @@ module.exports = async function (Server) {
             match.start_timestamp = round.start_timestamp;
           }
         });
+      }
+      round.waitingPlayers = await Server.db.all(
+        "SELECT * FROM waiting_players WHERE round_number = ? AND tournament_id = ?",
+        [round.round_number, Server.currentTournament.id]
+      );
+    }
 
-        round.waitingPlayers = await Server.db.all(
-          "SELECT * FROM waiting_players WHERE round_number = ? AND tournament_id = ?",
-          [round.round_number, Server.currentTournament.id]
-        );
-      })
-    );
+    if (
+      Server.currentTournament.currentRound &&
+      Server.currentTournament.currentRound > 0
+    ) {
+      Server.currentTournament.rounds[
+        Server.currentTournament.currentRound - 1
+      ].matches = matches;
+    }
   };
   await Server.updateCurrentTournamentFromDb();
 };

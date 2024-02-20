@@ -5,6 +5,12 @@ const {
   signPlayed,
   signVerified,
   matchRoundFinished,
+  matchFinished,
+  newMatchCreated,
+  tournamentRoundStarted,
+  tournamentFinished,
+  newPlayerWaiting,
+  playerSkippedRound,
 } = require("./events");
 
 module.exports = async function (Server) {
@@ -31,6 +37,24 @@ module.exports = async function (Server) {
         break;
       case "klash.match_round_finished_event":
         await matchRoundFinished(Server, decodedEvent.args);
+        break;
+      case "klash.match_finished_event":
+        await matchFinished(Server, decodedEvent.args);
+        break;
+      case "klash.new_match_created_event":
+        await newMatchCreated(Server, decodedEvent.args);
+        break;
+      case "klash.tournament_round_started_event":
+        await tournamentRoundStarted(Server, decodedEvent.args);
+        break;
+      case "klash.tournament_finished_event":
+        await tournamentFinished(Server, decodedEvent.args);
+        break;
+      case "klash.new_player_waiting_event":
+        await newPlayerWaiting(Server, decodedEvent.args);
+        break;
+      case "klash.player_skipped_round_event":
+        await playerSkippedRound(Server, decodedEvent.args);
         break;
       default:
         break;

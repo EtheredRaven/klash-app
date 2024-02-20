@@ -80,7 +80,10 @@ export const createStore = (app) => {
         state.currentTournament = tournament;
       },
       addPlayerToCurrentTournament(state, player) {
-        state.currentTournament.players.push(player);
+        state.currentTournament.players = [
+          ...state.currentTournament.players,
+          player,
+        ];
       },
     },
     actions: {

@@ -18,7 +18,10 @@ module.exports = function (Server) {
       socket.linkedAddress = address;
       socket.join(socket.linkedAddress);
 
-      if (Server.currentTournament?.start_timestamp) {
+      if (
+        Server.currentTournament?.start_timestamp &&
+        !Server.currentTournament?.end_timestamp
+      ) {
         Server.emitPlayerMatchState(socket);
       }
     });
@@ -89,6 +92,26 @@ module.exports = function (Server) {
     );
   };
 
+  Server.emitMatchFinished = (match) => {
+    Server.io.to(match.player_1).emit("match_finished", match);
+    Server.io.to(match.player_2).emit("match_finished", match);
+    Server.infoLogging(
+      "Emitting match_finished",
+      match.player_1,
+      match.player_2
+    );
+  };
+
+  Server.emitMatchCreated = (playerAddress, match) => {
+    Server.io.to(playerAddress).emit("match_created", match);
+    Server.infoLogging("Emitting new_match_created", playerAddress);
+  };
+
+  Server.emitPlayerWaiting = (playerAddress) => {
+    Server.io.to(playerAddress).emit("player_waiting");
+    Server.infoLogging("Emitting player_waiting", playerAddress);
+  };
+
   Server.emitTournamentRoundStarted = (roundNumber) => {
     const round = Server.currentTournament.rounds[roundNumber - 1];
     Server.infoLogging(
@@ -97,38 +120,52 @@ module.exports = function (Server) {
       roundNumber
     );
     round.matches.forEach((match) => {
-      Server.io.to(match.player_1).emit("match_created", match);
-      Server.io.to(match.player_2).emit("match_created", match);
-      Server.infoLogging("Emitting match_created", match.player_1);
-      Server.infoLogging("Emitting match_created", match.player_2);
+      Server.emitMatchCreated(match.player_1, match);
+      Server.emitMatchCreated(match.player_2, match);
     });
     round.waitingPlayers.forEach((player) => {
-      Server.io.to(player.address).emit("player_waiting");
-      Server.infoLogging("Emitting player_waiting", player.address);
+      Server.emitPlayerWaiting(player.address);
     });
+  };
+
+  Server.emitTournamentFinished = () => {
+    Server.io.sockets.emit("tournament_finished", Server.currentTournament);
+    Server.infoLogging(
+      "Emitting tournament_finished",
+      Server.currentTournament
+    );
   };
 
   Server.emitPlayerMatchState = (socket) => {
     if (!socket.linkedAddress) return;
-    for (let round of Server.currentTournament.rounds) {
-      let match = round.matches.find((match) => {
-        return (
-          match.player_1 == socket.linkedAddress ||
-          match.player_2 == socket.linkedAddress
-        );
-      });
-      if (match) {
-        Server.io.to(socket.linkedAddress).emit("match_created", match);
-        Server.infoLogging("Emitting match_created", socket.linkedAddress);
-        return;
-      }
+    const round =
+      Server.currentTournament.rounds[
+        Server.currentTournament.currentRound - 1
+      ];
+    let match = round.matches.find((match) => {
+      return (
+        match.player_1 == socket.linkedAddress ||
+        match.player_2 == socket.linkedAddress
+      );
+    });
+    if (match) {
+      Server.emitMatchCreated(socket.linkedAddress, match);
+      return;
+    }
 
-      let waitingPlayer = round.waitingPlayers.find((player) => {
+    // A player can be waiting in a later round if he skipped a round
+    for (
+      let i = Server.currentTournament.currentRound;
+      i <= Server.currentTournament.rounds.length;
+      i++
+    ) {
+      const waitingPlayer = Server.currentTournament.rounds[
+        i - 1
+      ].waitingPlayers.find((player) => {
         return player.address == socket.linkedAddress;
       });
       if (waitingPlayer) {
-        Server.io.to(socket.linkedAddress).emit("player_waiting");
-        Server.infoLogging("Emitting player_waiting", socket.linkedAddress);
+        Server.emitPlayerWaiting(socket.linkedAddress);
         return;
       }
     }

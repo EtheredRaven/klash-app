@@ -14,7 +14,7 @@ class DbModel {
       `CREATE TABLE IF NOT EXISTS rounds (round_number INTEGER, tournament_id INTEGER, start_timestamp INTEGER, CONSTRAINT roundPK PRIMARY KEY (tournament_id, round_number), FOREIGN KEY(tournament_id) REFERENCES tournaments(id));`
     );
     await this.db.run(
-      `CREATE TABLE IF NOT EXISTS matches (round_number INTEGER, tournament_id INTEGER, player_1 TEXT, player_2 TEXT, score_1 INTEGER, score_2 INTEGER, last_action_timestamp_1 INTEGER, last_action_timestamp_2 INTEGER, sign_1 INTEGER, sign_hash_1 TEXT, sign_2 INTEGER, sign_hash_2 TEXT, winner TEXT, CONSTRAINT matchPK PRIMARY KEY (tournament_id, player_1, player_2), FOREIGN KEY(tournament_id) REFERENCES tournaments(id));`
+      `CREATE TABLE IF NOT EXISTS matches (round_number INTEGER, tournament_id INTEGER, player_1 TEXT, player_2 TEXT, score_1 INTEGER, score_2 INTEGER, last_action_timestamp_1 INTEGER, last_action_timestamp_2 INTEGER, sign_1 INTEGER, sign_hash_1 TEXT, sign_2 INTEGER, sign_hash_2 TEXT, winner INTEGER, CONSTRAINT matchPK PRIMARY KEY (tournament_id, player_1, player_2), FOREIGN KEY(tournament_id) REFERENCES tournaments(id));`
     );
     await this.db.run(
       `CREATE TABLE IF NOT EXISTS waiting_players (address TEXT, round_number INTEGER, tournament_id INTEGER, CONSTRAINT waitingPlayersPK PRIMARY KEY (tournament_id, round_number, address), FOREIGN KEY(tournament_id) REFERENCES tournaments(id));`

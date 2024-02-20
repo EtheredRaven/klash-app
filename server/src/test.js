@@ -1,13 +1,11 @@
 module.exports = async function (Server) {
   Server.BLOCKS_TO_PROCESS_IDS = [
-    "0x12207cab0c9500411004288e5b4832e5d5b680eeca14de5a2046d524bb6ea8d167ba",
-    "0x1220ce6fcbab496a7654f9c646647cb385fac76257053e732104941ea63ec06002e3",
+    "0x122003a6fd991b6fc6096c8114cd6a650980cfb891bfb366485867e5b35bf7f3c8da",
   ];
 
-  /* Server.BLOCKS_TO_PROCESS = (
+  /*Server.BLOCKS_TO_PROCESS = (
     await Server.client.blockStore.getBlocksById([
-      "0x12207cab0c9500411004288e5b4832e5d5b680eeca14de5a2046d524bb6ea8d167ba",
-      "0x1220ce6fcbab496a7654f9c646647cb385fac76257053e732104941ea63ec06002e3",
+      "0x122003a6fd991b6fc6096c8114cd6a650980cfb891bfb366485867e5b35bf7f3c8da",
     ])
   ).block_items;
 
@@ -23,7 +21,7 @@ module.exports = async function (Server) {
     });
     Server.logStream.write(JSON.stringify(block));
     Server.logStream.close();
-  }); */
+  });*/
 
   /*
       "0x122030a5d4689188507943cf471abbc2835f2c59e36aabdf926b603eaabfb29660d1",
@@ -49,5 +47,11 @@ module.exports = async function (Server) {
       "0x1220abbd2134a96026764b380213d529ee7f5ad16e70b7fd7f4b6bfd709364f1ca14",
        "0x12207cab0c9500411004288e5b4832e5d5b680eeca14de5a2046d524bb6ea8d167ba",
       "0x1220ce6fcbab496a7654f9c646647cb385fac76257053e732104941ea63ec06002e3",
+      "0x12200ceb816ba0d4a166c0cfe9f784d4a9450e70473dca1d3be2cdfd0adde3922017",
+      "0x1220d908c1e1a57c813463a49f4580f34ffd5635ba6ba9a47ba870103bc8ded3e4c0",
+            "0x12201f06a010563e07fe1a29262e468744e2f9a25898b0aae118707f8ed380880364",
+      "0x1220676ed83f98a0edc277293522dfb1a8183e253ddd74936ade0309584df32014b4",
+            "0x1220bc4391b232026b1e582342662e4f1aa9813be1a25f0438db65bf4cbb5330020d",
+      "0x122075c7981046d9c7ee4891aa9c7b039c4402e922ce2c85cb99a7fd12a13b47d85e",
   */
 };

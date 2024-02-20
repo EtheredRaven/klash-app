@@ -5,7 +5,7 @@
     <div class="card-body p-0">
       <div class="stats stats-horizontal">
         <div class="stat px-4">
-          <div class="stat-value">
+          <div class="stat-value" v-if="!waiting">
             {{ player.score }}
           </div>
           <div class="stat-title">
@@ -74,6 +74,7 @@
 <script>
   import { ROCK_SIGN, PAPER_SIGN, SCISSORS_SIGN } from "../utils/constants";
   import { playSign } from "../services/playSign.js";
+  import { shortenAddress } from "../utils/formatting";
 
   export default {
     name: "PlayerCard",
@@ -81,6 +82,10 @@
       player: {
         type: Object,
         required: true,
+      },
+      waiting: {
+        type: Boolean,
+        default: false,
       },
     },
     data() {
@@ -112,10 +117,9 @@
       },
     },
     methods: {
-      shortenAddress: function (addr) {
-        return addr.substr(0, 10) + "..." + addr.slice(-5);
-      },
+      shortenAddress,
       getStateClassButton(sign) {
+        if (this.waiting || this.currentMatch.winner > 1) return "btn-disabled";
         if (this.signPlayed == sign) {
           return "btn-primary";
         } else if (this.signPlayed) {

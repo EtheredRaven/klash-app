@@ -1,9 +1,24 @@
 <template>
   <div>
-    <PlayerCard :player="opponentObject" />
+    <PlayerCard v-if="!match.waiting" :player="opponentObject" />
     <div class="stat mb-8">
       <div class="stat-title">
-        <span v-if="!userObject.sign_hash || !opponentObject.sign_hash">
+        <span v-if="match.waiting">
+          <span class="loading loading-dots loading-md"></span><br />
+          You skipped this round! Waiting for your next opponent...</span
+        >
+        <span v-else-if="match.winner > 1">
+          <span v-if="hasWon"
+            ><span class="text-success font-bold">😊 You won!</span><br />
+            <span class="loading loading-dots loading-md mt-3"></span
+            ><br />Waiting for your next match...</span
+          >
+          <span v-else
+            ><span class="text-error font-bold">🙁 You lost!</span><br />Try
+            again in the next tournament!</span
+          >
+        </span>
+        <span v-else-if="!userObject.sign_hash || !opponentObject.sign_hash">
           {{ getMatchInfoSentence() }}
         </span>
         <button
@@ -31,9 +46,9 @@
         <span v-else-if="!opponentObject.sign">
           Waiting for your opponent to unveil his sign...
         </span>
-        <span v-else> Round is being resolved! </span>
+        <span v-else>Match is being resolved...</span>
       </div>
-      <div clas="stat-value">
+      <div class="stat-value" v-if="match.winner <= 1 && !match.waiting">
         <span class="countdown font-mono text-2xl">
           <span :style="'--value: ' + nextStepCountdown.h"></span>:
           <span :style="'--value: ' + nextStepCountdown.m"></span>:
@@ -41,12 +56,16 @@
         </span>
       </div>
     </div>
-    <PlayerCard :player="userObject" />
+    <PlayerCard :player="userObject" :waiting="match.waiting" />
   </div>
 </template>
 
 <script>
   import PlayerCard from "../components/PlayerCard.vue";
+  import {
+    MATCH_PLAYER_1_WON,
+    MATCH_PLAYER_2_WON,
+  } from "../utils/constants.js";
   import { TIMEOUT_DURATION } from "../utils/constants.js";
   import { getRemainingTime } from "../utils/dateTime";
   import { verifySign } from "../services/verifySign";
@@ -75,6 +94,12 @@
       isPlayer1() {
         return this.$store.state.activeAccount?.address === this.match.player_1;
       },
+      hasWon() {
+        let ret =
+          (this.match.winner == MATCH_PLAYER_1_WON && this.isPlayer1) ||
+          (!this.isPlayer1 && this.match.winner == MATCH_PLAYER_2_WON);
+        return ret;
+      },
       players() {
         let player1 = {
           address: this.match.player_1,
@@ -99,6 +124,8 @@
       userObject() {
         let ret = this.players.user;
         ret.isUser = true;
+        if (this.match.waiting)
+          ret.address = this.$store.state.activeAccount?.address;
         return ret;
       },
       opponentObject() {
@@ -115,12 +142,17 @@
       },
       updateCountdown() {
         let actionTimestamp =
-          (this.userObject.sign_hash && this.opponentObject.sign_hash
-            ? Math.min(
-                this.userObject.last_action_timestamp,
-                this.opponentObject.last_action_timestamp
-              )
-            : this.match.start_timestamp) + TIMEOUT_DURATION;
+          Math.floor(
+            (this.userObject.last_action_timestamp > 0 &&
+            this.opponentObject.last_action_timestamp > 0
+              ? Math.min(
+                  this.userObject.last_action_timestamp,
+                  this.opponentObject.last_action_timestamp
+                )
+              : this.match.start_timestamp) / 1000
+          ) *
+            1000 +
+          TIMEOUT_DURATION;
         this.nextStepCountdown = getRemainingTime(actionTimestamp);
       },
       getMatchInfoSentence() {

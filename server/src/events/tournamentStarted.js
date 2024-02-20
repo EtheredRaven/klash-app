@@ -1,3 +1,5 @@
+const insertMatch = require("../../db/insertMatch");
+
 module.exports = async function (Server, eventArgs) {
   const tournamentRounds = eventArgs.tree.rounds;
   const tournamentMatches = tournamentRounds[0].matches;
@@ -22,24 +24,7 @@ module.exports = async function (Server, eventArgs) {
   // Insert matches
   await Promise.all(
     tournamentMatches.map(async (match) => {
-      await Server.db.run(
-        `INSERT OR REPLACE INTO matches VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
-          match.round,
-          Server.currentTournament.id,
-          match.player1.address,
-          match.player2.address,
-          match.score1,
-          match.score2,
-          match.player1.lastActionTimestamp,
-          match.player2.lastActionTimestamp,
-          match.sign1?.sign,
-          match.sign1?.signHash,
-          match.sign2?.sign,
-          match.sign2?.signHash,
-          match.winner,
-        ]
-      );
+      await insertMatch(Server, match);
     })
   );
 
