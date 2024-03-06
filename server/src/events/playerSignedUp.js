@@ -8,7 +8,7 @@ module.exports = async function (Server, eventArgs) {
   );
 
   if (Server.currentTournament.id == tournamentId) {
-    await Server.updateCurrentTournamentFromDb();
+    await Server.updateSignedUpPlayersFromDb();
     Server.emitPlayerSignedUp(playerAddress);
   }
 };

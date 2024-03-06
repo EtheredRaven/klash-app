@@ -53,6 +53,7 @@
   await new DbModel(Server.db).loadModels();
 
   // Requirements
+  require("./src/timeouts")(Server);
   require("./src/contracts")(Server);
 
   Server.app.use("/", express.static(__dirname + "/../client/dist"));
@@ -62,5 +63,5 @@
 
   require("./src/socket")(Server);
   require("./src/processBlocks")(Server);
-  require("./src/initData")(Server);
+  require("./src/dbDataFetching")(Server);
 })();

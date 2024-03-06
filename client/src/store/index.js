@@ -20,6 +20,8 @@ export const createStore = (app) => {
       hashingSeed: null,
       tempHashingSeed: null,
       tempSignPlayed: null,
+      cantPlayTimeout: null,
+      infoModal: {},
     },
     getters: {
       localStorageKey: (state) => {
@@ -31,6 +33,8 @@ export const createStore = (app) => {
           state.currentMatch.score_1 +
           "-" +
           state.currentMatch.score_2 +
+          "-" +
+          state.currentMatch.draws_count +
           "-" +
           state.activeAccount.address
         );
@@ -79,28 +83,53 @@ export const createStore = (app) => {
       setCurrentTournament(state, tournament) {
         state.currentTournament = tournament;
       },
+      setCanPlayTimeout(state) {
+        if (state.cantPlayTimeout) {
+          clearTimeout(state.cantPlayTimeout);
+          state.cantPlayTimeout = null;
+        }
+      },
+      setCantPlayTimeout(state) {
+        state.cantPlayTimeout && clearTimeout(state.cantPlayTimeout);
+        state.cantPlayTimeout = setTimeout(() => {
+          state.cantPlayTimeout = null;
+        }, 30000);
+      },
       addPlayerToCurrentTournament(state, player) {
         state.currentTournament.players = [
           ...state.currentTournament.players,
           player,
         ];
       },
+      openInfoModal(state, { title, message, icon1, icon2, textBetween }) {
+        state.infoModal = {
+          title: title,
+          message: message,
+          icon1: icon1,
+          icon2: icon2,
+          textBetween: textBetween,
+        };
+
+        document.getElementById("infoModal").showModal();
+      },
     },
     actions: {
       setCurrentMatch({ state, getters }, match) {
         state.currentMatch = match;
-        state.hashingSeed = window.localStorage.getItem(
-          "klash-hashingSeed-" + getters.localStorageKey
-        );
-        state.signPlayed = window.localStorage.getItem(
-          "klash-signPlayed-" + getters.localStorageKey
-        );
-        state.tempHashingSeed = window.localStorage.getItem(
-          "klash-tempHashingSeed-" + getters.localStorageKey
-        );
-        state.tempSignPlayed = window.localStorage.getItem(
-          "klash-tempSignPlayed-" + getters.localStorageKey
-        );
+        if (match) {
+          state.hashingSeed = window.localStorage.getItem(
+            "klash-hashingSeed-" + getters.localStorageKey
+          );
+          state.signPlayed = window.localStorage.getItem(
+            "klash-signPlayed-" + getters.localStorageKey
+          );
+          state.tempHashingSeed = window.localStorage.getItem(
+            "klash-tempHashingSeed-" + getters.localStorageKey
+          );
+          state.tempSignPlayed = window.localStorage.getItem(
+            "klash-tempSignPlayed-" + getters.localStorageKey
+          );
+        }
       },
       setHashingSeed({ state, getters }, seed) {
         state.hashingSeed = seed;
@@ -261,12 +290,12 @@ export const createStore = (app) => {
           JSON.stringify(state.walletsList)
         );
       },
-      signOut({ state, commit }) {
+      signOut({ state, dispatch }) {
         // Unlink the previous account if there is one
         if (state.activeAccount) {
           app.config.globalProperties.$socket.emit("unlink_socket_to_address");
         }
-        commit("setCurrentMatch", null);
+        dispatch("setCurrentMatch", null);
         state.activeWallet = null;
         state.activeAccount = null;
       },

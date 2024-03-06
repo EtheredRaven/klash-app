@@ -17,7 +17,7 @@ export async function playSign(vue, sign, seed) {
 
     vue.$info("Your sign play intention has been sent to the blockchain!");
 
-    await transaction.wait("byBlock", 60000);
+    await transaction.wait("byBlock", 30000);
     vue.$transactionInfo("Sign intention successfully played!", transaction);
   } catch (err) {
     vue.$error(formatChainError(err), "Play sign failed !");

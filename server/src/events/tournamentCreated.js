@@ -1,18 +1,10 @@
+const { getUTCTimestamp } = require("../utils");
+
 module.exports = async function (Server, eventArgs) {
   let tournamentConfig = eventArgs.config;
 
   if (process.env.PREDEFINED_BLOCKS_TESTING) {
-    let now = new Date();
-    let UTCTimestamp = Date.UTC(
-      now.getUTCFullYear(),
-      now.getUTCMonth(),
-      now.getUTCDate(),
-      now.getUTCHours(),
-      now.getUTCMinutes(),
-      now.getUTCSeconds(),
-      now.getUTCMilliseconds()
-    );
-    tournamentConfig.tournamentSignUpStart = UTCTimestamp;
+    tournamentConfig.tournamentSignUpStart = getUTCTimestamp();
   }
 
   await Server.db.run(

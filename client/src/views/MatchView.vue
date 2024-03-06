@@ -5,13 +5,14 @@
       <div class="stat-title">
         <span v-if="match.waiting">
           <span class="loading loading-dots loading-md"></span><br />
-          You skipped this round! Waiting for your next opponent...</span
+          You automatically won this round due to a odd number of players.
+          Please wait for the next round to start...</span
         >
         <span v-else-if="match.winner > 1">
           <span v-if="hasWon"
             ><span class="text-success font-bold">😊 You won!</span><br />
             <span class="loading loading-dots loading-md mt-3"></span
-            ><br />Waiting for your next match...</span
+            ><br />Waiting for the next round to start...</span
           >
           <span v-else
             ><span class="text-error font-bold">🙁 You lost!</span><br />Try
@@ -178,6 +179,9 @@
           this.$store.state.tempHashingSeed
         );
       },
+    },
+    beforeUnmount() {
+      clearInterval(this.updateCountdownInterval);
     },
   };
 </script>

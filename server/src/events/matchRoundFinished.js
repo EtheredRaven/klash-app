@@ -20,11 +20,7 @@ module.exports = async function (Server, eventArgs) {
       round,
     ]
   );
-  let updatedMatch = await Server.db.get(
-    `SELECT * FROM matches WHERE tournament_id = ? AND player_1 = ? AND player_2 = ? AND round_number = ?`,
-    [tournamentId, player1.address, player2.address, round]
-  );
 
-  await Server.updateCurrentTournamentFromDb();
+  let updatedMatch = await Server.updateMatchFromDb(eventArgs.match);
   Server.emitMatchRoundFinished(updatedMatch);
 };

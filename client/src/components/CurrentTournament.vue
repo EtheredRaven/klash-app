@@ -178,6 +178,9 @@
       },
       shortenAddress,
     },
+    beforeUnmount() {
+      clearInterval(this.updateCountdownInterval);
+    },
   };
 </script>
 

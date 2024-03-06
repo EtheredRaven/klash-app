@@ -20,31 +20,37 @@ module.exports = async function (Server, eventArgs) {
   const player2Sign = sign2?.sign;
   const player2SignHash = sign2?.signHash;
 
-  await Server.db.run(
-    `UPDATE matches SET player_1 = ?, player_2 = ?, score_1 = ?, score_2 = ?, winner = ?, last_action_timestamp_1 = ?, last_action_timestamp_2 = ?, sign_1 = ?, sign_hash_1 = ?, sign_2 = ?, sign_hash_2 = ? WHERE tournament_id = ? AND round_number = ? AND player_1 = ? AND player_2 = ?`,
-    [
-      player1Address,
-      player2Address,
-      score1,
-      score2,
-      winner,
-      lastActionTimestamp1,
-      lastActionTimestamp2,
-      player1Sign,
-      player1SignHash,
-      player2Sign,
-      player2SignHash,
-      tournamentId,
-      round,
-      player1Address,
-      player2Address,
-    ]
-  );
-  let updatedMatch = await Server.db.get(
-    `SELECT * FROM matches WHERE tournament_id = ? AND round_number = ? AND player_1 = ? AND player_2 = ?`,
-    [tournamentId, round, player1Address, player2Address]
-  );
+  let sql = `UPDATE matches SET player_1 = ?, player_2 = ?, score_1 = ?, score_2 = ?, winner = ?, last_action_timestamp_1 = ?, last_action_timestamp_2 = ?, sign_1 = ?, sign_hash_1 = ?, sign_2 = ?, sign_hash_2 = ?`;
+  let params = [
+    player1Address,
+    player2Address,
+    score1,
+    score2,
+    winner,
+    lastActionTimestamp1,
+    lastActionTimestamp2,
+    player1Sign,
+    player1SignHash,
+    player2Sign,
+    player2SignHash,
+  ];
 
-  await Server.updateCurrentTournamentFromDb();
+  if (player1Sign == player2Sign) {
+    // Get the current match from the currentTourament
+    const currentMatch = Server.currentTournament.rounds[
+      round - 1
+    ].matches.find(
+      (m) => m.player_1 == player1Address && m.player_2 == player2Address
+    );
+    let draws_count = currentMatch.draws_count + 1;
+    sql += `, draws_count = ?`;
+    params.push(draws_count);
+  }
+
+  sql += ` WHERE tournament_id = ? AND round_number = ? AND player_1 = ? AND player_2 = ?`;
+  params.push(tournamentId, round, player1Address, player2Address);
+
+  await Server.db.run(sql, params);
+  let updatedMatch = await Server.updateMatchFromDb(eventArgs.match);
   Server.emitSignVerified(updatedMatch, isPlayer1);
 };

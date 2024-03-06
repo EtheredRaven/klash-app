@@ -58,7 +58,7 @@ module.exports = function (Server) {
 
   Server.emitTournamentCreated = (tournament) => {
     Server.io.sockets.emit("tournament_created", tournament);
-    Server.infoLogging("Emitting tournament_created", tournament);
+    Server.infoLogging("Emitting tournament_created", tournament.id);
   };
 
   Server.emitPlayerSignedUp = (playerAddress) => {
@@ -102,18 +102,23 @@ module.exports = function (Server) {
     );
   };
 
-  Server.emitMatchCreated = (playerAddress, match) => {
-    Server.io.to(playerAddress).emit("match_created", match);
+  Server.emitMatchCreated = (playerAddress, match, socket = null) => {
+    (socket ? socket : Server.io.to(playerAddress)).emit(
+      "match_created",
+      match
+    );
     Server.infoLogging("Emitting new_match_created", playerAddress);
   };
 
-  Server.emitPlayerWaiting = (playerAddress) => {
-    Server.io.to(playerAddress).emit("player_waiting");
+  Server.emitPlayerWaiting = (playerAddress, socket = null) => {
+    (socket ? socket : Server.io.to(playerAddress)).emit("player_waiting");
     Server.infoLogging("Emitting player_waiting", playerAddress);
   };
 
   Server.emitTournamentRoundStarted = (roundNumber) => {
     const round = Server.currentTournament.rounds[roundNumber - 1];
+    console.log(Server.currentTournament.rounds);
+    console.log(round);
     Server.infoLogging(
       "Tournament round started",
       Server.currentTournament.id,
@@ -132,7 +137,7 @@ module.exports = function (Server) {
     Server.io.sockets.emit("tournament_finished", Server.currentTournament);
     Server.infoLogging(
       "Emitting tournament_finished",
-      Server.currentTournament
+      Server.currentTournament.id
     );
   };
 
@@ -149,7 +154,7 @@ module.exports = function (Server) {
       );
     });
     if (match) {
-      Server.emitMatchCreated(socket.linkedAddress, match);
+      Server.emitMatchCreated(socket.linkedAddress, match, socket);
       return;
     }
 
@@ -165,7 +170,7 @@ module.exports = function (Server) {
         return player.address == socket.linkedAddress;
       });
       if (waitingPlayer) {
-        Server.emitPlayerWaiting(socket.linkedAddress);
+        Server.emitPlayerWaiting(socket.linkedAddress, socket);
         return;
       }
     }

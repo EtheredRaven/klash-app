@@ -1,6 +1,6 @@
 module.exports = async function (Server, match) {
   await Server.db.run(
-    `INSERT OR REPLACE INTO matches VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT OR REPLACE INTO matches VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       match.round,
       match.tournamentId,
@@ -15,6 +15,7 @@ module.exports = async function (Server, match) {
       match.sign2?.sign,
       match.sign2?.signHash,
       match.winner,
+      0,
     ]
   );
 };

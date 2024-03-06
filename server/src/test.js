@@ -1,11 +1,11 @@
 module.exports = async function (Server) {
   Server.BLOCKS_TO_PROCESS_IDS = [
-    "0x122003a6fd991b6fc6096c8114cd6a650980cfb891bfb366485867e5b35bf7f3c8da",
+    "0x1220ea95f31cfa4572d401252c3d314f7fb6a1433150db746126590aa5f4cdc3c121",
   ];
 
   /*Server.BLOCKS_TO_PROCESS = (
     await Server.client.blockStore.getBlocksById([
-      "0x122003a6fd991b6fc6096c8114cd6a650980cfb891bfb366485867e5b35bf7f3c8da",
+      "0x12201c98d55dad5bdfd81218053fb781fda9887d787eefb6355ba387d91959b89ed5",
     ])
   ).block_items;
 

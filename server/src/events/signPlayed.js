@@ -40,11 +40,6 @@ module.exports = async function (Server, eventArgs) {
       player2Address,
     ]
   );
-  let updatedMatch = await Server.db.get(
-    `SELECT * FROM matches WHERE tournament_id = ? AND round_number = ? AND player_1 = ? AND player_2 = ?`,
-    [tournamentId, round, player1Address, player2Address]
-  );
-
-  await Server.updateCurrentTournamentFromDb();
+  let updatedMatch = await Server.updateMatchFromDb(eventArgs.match);
   Server.emitSignPlayed(updatedMatch, isPlayer1);
 };

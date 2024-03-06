@@ -3,9 +3,9 @@ module.exports = async function (Server, eventArgs) {
 
   await Server.db.run(
     `INSERT OR REPLACE INTO waiting_players VALUES (?, ?, ?)`,
-    [player, Server.currentTournament.currentRound, tournamentId]
+    [player, Server.currentTournament.currentRound + 1, tournamentId]
   );
 
-  await Server.updateCurrentTournamentFromDb();
+  await Server.updateWaitingPlayersFromDb();
   Server.emitPlayerWaiting(player.address);
 };
