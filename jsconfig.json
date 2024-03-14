@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      // Add your custom path mappings here
+    }
+  },
+  "exclude": ["node_modules"]
+}

@@ -87,9 +87,10 @@ module.exports = async function (Server) {
     if (!Server.currentTournament) return;
 
     let roundsDB = await Promise.all([
-      Server.db.all("SELECT * FROM rounds WHERE tournament_id = ?", [
-        Server.currentTournament.id,
-      ]),
+      Server.db.all(
+        "SELECT *, (SELECT COUNT(*) FROM matches WHERE round_number = rounds.round_number AND tournament_id = rounds.tournament_id) AS match_count FROM rounds WHERE tournament_id = ?",
+        [Server.currentTournament.id]
+      ),
       Server.db.get(
         "SELECT round_number FROM rounds WHERE tournament_id = ? AND start_timestamp > 0 ORDER BY round_number DESC LIMIT 1",
         [Server.currentTournament.id]

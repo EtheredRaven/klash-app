@@ -18,7 +18,7 @@ module.exports = async function (Server) {
     process.env.BLOCKS_PROCESSING_INTERVAL || 1000;
   let CURRENT_TEST_BLOCK_HEIGHT = 0;
 
-  let processKlashEvents = async function (decodedEvent, txId) {
+  let processKlashEvents = async function (decodedEvent) {
     switch (decodedEvent.name) {
       case "klash.tournament_created_event":
         await tournamentCreated(Server, decodedEvent.args);
@@ -68,28 +68,30 @@ module.exports = async function (Server) {
       processingFunction: processKlashEvents,
     },
   ];
-  let processEvent = async function (event, txId) {
+  let processEvent = async function (event) {
     for (let i = 0; i < PROCESSING_EVENTS_ROUTER.length; i++) {
       let processingEventRouter = PROCESSING_EVENTS_ROUTER[i];
       if (event.source == processingEventRouter.contractAddress) {
         let decodedEvent = await processingEventRouter.contract.decodeEvent(
           event
         );
-        await processingEventRouter.processingFunction(decodedEvent, txId);
-        Server.infoLogging("Processed event", txId, decodedEvent.name);
-        return;
+        Server.infoLogging("Processing event", decodedEvent.name);
+        await processingEventRouter.processingFunction(decodedEvent);
+        Server.infoLogging("Processed event", decodedEvent.name);
+        return event.source == Server.klashContractAddress;
       }
     }
+    return false;
   };
 
   let processBlocks = async function (blocksToProcess) {
     // Process the block in the right order
+    let updateTournament = false;
     for (let i = blocksToProcess.length - 1; i >= 0; i--) {
       let block = blocksToProcess[i];
 
       // Process the events
       let transactionReceipts = block.receipt.transaction_receipts;
-      let receiptId = block.receipt.id;
       if (transactionReceipts) {
         for (let j = 0; j < transactionReceipts.length; j++) {
           let txReceipt = transactionReceipts[j];
@@ -98,14 +100,27 @@ module.exports = async function (Server) {
             for (let k = 0; k < events.length; k++) {
               // Process each event
               let event = events[k];
-              await processEvent(event, receiptId);
+              let shouldUpdateTournament = await processEvent(event);
+              if (!updateTournament && shouldUpdateTournament) {
+                updateTournament = true;
+              }
             }
           }
-          Server.infoLogging("Processed transaction", receiptId);
         }
       }
-
       Server.infoLogging("Processed block", block.block_height, block.block_id);
+    }
+
+    // Send the tournament to the admin if it was updated
+    if (updateTournament) {
+      Server.adminsSockets.forEach((socket) => {
+        socket.emit("admin_tournament_updated", Server.currentTournament);
+        Server.infoLogging(
+          socket,
+          "Emitting admin_tournament_updated",
+          Server.currentTournament.id
+        );
+      });
     }
   };
 

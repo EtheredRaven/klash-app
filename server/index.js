@@ -57,10 +57,11 @@
   require("./src/contracts")(Server);
 
   Server.app.use("/", express.static(__dirname + "/../client/dist"));
-  Server.app.get("/", function (req, res) {
+  Server.app.get("/*", function (req, res) {
     res.sendFile(path.resolve(__dirname + "/../client/dist/index.html"));
   });
 
+  require("./src/admin")(Server);
   require("./src/socket")(Server);
   require("./src/processBlocks")(Server);
   require("./src/dbDataFetching")(Server);

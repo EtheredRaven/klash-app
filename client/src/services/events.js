@@ -9,14 +9,16 @@ export function initSocket(vue) {
   vue.$socket.on("tournament_created", (tournament) => {
     vue.$store.commit("setCurrentTournament", tournament);
   });
+
   vue.$socket.on("player_signed_up", (address) => {
     vue.$store.commit("addPlayerToCurrentTournament", address);
   });
+
   vue.$socket.on("match_created", (match) => {
-    console.log(match);
     vue.$store.dispatch("setCurrentMatch", match);
     vue.$store.commit("setCanPlayTimeout");
   });
+
   vue.$socket.on("player_waiting", () => {
     vue.$store.commit("openInfoModal", {
       title: "Waiting for your next opponent...",
@@ -28,6 +30,7 @@ export function initSocket(vue) {
       player_1: vue.$store.state.activeAccount?.address,
     });
   });
+
   vue.$socket.on("sign_played", (isUser, match) => {
     vue.$store.dispatch("setCurrentMatch", match);
     if (isUser) {
@@ -39,6 +42,7 @@ export function initSocket(vue) {
       vue.$store.commit("setCanPlayTimeout");
     }
   });
+
   vue.$socket.on("sign_verified", (match) => {
     vue.$store.dispatch("setCurrentMatch", match);
   });

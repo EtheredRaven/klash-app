@@ -7,6 +7,7 @@ module.exports = async function (Server, eventArgs) {
     [timestamp, tournamentId, round]
   );
 
+  Server.resetTimeouts();
   await Server.updateCurrentTournamentFromDb();
   Server.emitTournamentRoundStarted(Server.currentTournament.currentRound);
 };

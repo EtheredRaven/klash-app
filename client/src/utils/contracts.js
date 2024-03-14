@@ -15,5 +15,8 @@ export function getKlashContract(signer) {
     abi: klashAbi,
     provider,
     signer,
+    options: {
+      rcLimit: 100000000,
+    },
   }).functions;
 }

@@ -2,9 +2,15 @@ const { TIMEOUT_DURATION, MATCH_NOT_FINISHED } = require("./constants");
 const { getUTCTimestamp } = require("./utils");
 
 module.exports = function (Server) {
-  // This object will store all the timeouts that are currently running for the different addresses
-  Server.timeouts = {};
-  Server.timeoutTransactionsList = [];
+  Server.resetTimeouts = function () {
+    for (let player in Server.timeouts || {}) {
+      clearTimeout(Server.timeouts[player]);
+    }
+    Server.timeouts = {};
+    Server.timeoutTransactionsList = [];
+    Server.infoLogging("Timeouts reset");
+  };
+  Server.resetTimeouts();
 
   function timeoutTransactions() {
     setTimeout(async () => {
@@ -32,11 +38,11 @@ module.exports = function (Server) {
 
         if (canBeTimedOut) {
           try {
-            /*let { transaction } =
+            let { transaction } =
               await Server.klashContract.functions.timeout_player({
                 player: player,
               });
-            await transaction.wait("byBlock", 20000);*/
+            await transaction.wait("byBlock", 20000);
             Server.infoLogging("Player timed out", player);
           } catch (error) {
             Server.errorLogging("Error calling timeout_player", player, error);
@@ -70,17 +76,22 @@ module.exports = function (Server) {
       otherSignHash
     ) {
       let UTCTimestamp = getUTCTimestamp();
-      if (
-        !Server.timeoutTransactionsList.includes(player) &&
-        (!signHash || (signHash && otherSignHash && !sign))
-      ) {
+      Server.infoLogging(
+        player,
+        Server.timeoutTransactionsList.includes(player),
+        signHash,
+        otherSignHash,
+        sign
+      );
+      if (!signHash || (signHash && otherSignHash && !sign)) {
         let timeToTimeout = Math.max(
           0,
           TIMEOUT_DURATION - (UTCTimestamp - lastActionTimestamp)
         );
         Server.timeouts[player] = setTimeout(() => {
           Server.timeouts[player] = null;
-          Server.timeoutTransactionsList.push(player);
+          !Server.timeoutTransactionsList.includes(player) &&
+            Server.timeoutTransactionsList.push(player);
           Server.infoLogging("Timeout reached", player);
         }, timeToTimeout);
         Server.infoLogging(

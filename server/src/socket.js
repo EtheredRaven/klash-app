@@ -3,6 +3,8 @@ module.exports = function (Server) {
     Server.errorLogging(err);
   });
 
+  Server.adminsSockets = [];
+
   Server.io.on("connection", function (socket) {
     Server.initSocketLogging(socket);
     Server.infoLogging(socket, "New connection to Websocket");
@@ -30,7 +32,15 @@ module.exports = function (Server) {
       Server.unlinkSocketToAddress(socket);
     });
 
+    Server.initAdminSocketEvents(socket);
+
     socket.on("disconnect", function (reason) {
+      if (socket.isAdmin) {
+        Server.adminsSockets = Server.adminsSockets.filter(
+          (adminSocket) => adminSocket.id !== socket.id
+        );
+        Server.infoLogging(socket, "Admin disconnected from Websocket", reason);
+      }
       Server.disconnect(socket, reason);
     });
   });
@@ -117,8 +127,6 @@ module.exports = function (Server) {
 
   Server.emitTournamentRoundStarted = (roundNumber) => {
     const round = Server.currentTournament.rounds[roundNumber - 1];
-    console.log(Server.currentTournament.rounds);
-    console.log(round);
     Server.infoLogging(
       "Tournament round started",
       Server.currentTournament.id,

@@ -23,3 +23,13 @@ export function formatChainError(err) {
 export function shortenAddress(addr) {
   return addr.substr(0, 10) + "..." + addr.slice(-5);
 }
+
+export function getAddressLink(addr) {
+  return (
+    '<a href="https://koiner.app/addresses/' +
+    addr +
+    '" target="_blank">' +
+    shortenAddress(addr) +
+    "</a>"
+  );
+}

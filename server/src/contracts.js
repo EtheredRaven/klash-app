@@ -11,10 +11,8 @@ module.exports = function (Server) {
   Server.client = new Client(Server.PROVIDERS_URL); // koinos-rpc
 
   let signer;
-  if (!process.env.PREDEFINED_BLOCKS_TESTING) {
-    signer = Signer.fromWif(process.env.KLASH_PRIVATE_KEY);
-    signer.provider = Server.provider;
-  }
+  signer = Signer.fromWif(process.env.KLASH_PRIVATE_KEY);
+  signer.provider = Server.provider;
 
   Server.klashContractAddress = "1KLASH1i4nXLHWh19obwtotNGx2GufiMbG";
   Server.klashContract = new Contract({
