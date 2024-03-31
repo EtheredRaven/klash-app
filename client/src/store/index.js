@@ -15,12 +15,14 @@ export const createStore = (app) => {
       ),
       addressesData: {},
       currentTournament: null,
+      currentTournamentStats: null,
       currentMatch: null,
       signPlayed: null,
       hashingSeed: null,
       tempHashingSeed: null,
       tempSignPlayed: null,
       cantPlayTimeout: null,
+      lastRoundSigns: [],
       infoModal: {},
     },
     getters: {
@@ -83,6 +85,25 @@ export const createStore = (app) => {
       setCurrentTournament(state, tournament) {
         state.currentTournament = tournament;
       },
+      setCurrentTournamentStats(state, stats) {
+        state.currentTournamentStats = stats;
+      },
+      resetLastRoundSigns(state) {
+        state.lastRoundSigns = [];
+      },
+      addLastRoundSign(
+        state,
+        { playerSign, opponentSign, winner, playerScore, opponentScore }
+      ) {
+        state.lastRoundSigns.push({
+          playerSign: playerSign,
+          opponentSign: opponentSign,
+          playerScore: playerScore,
+          opponentScore: opponentScore,
+          winner: winner,
+          id: state.lastRoundSigns.length,
+        });
+      },
       setCanPlayTimeout(state) {
         if (state.cantPlayTimeout) {
           clearTimeout(state.cantPlayTimeout);
@@ -101,13 +122,17 @@ export const createStore = (app) => {
           player,
         ];
       },
-      openInfoModal(state, { title, message, icon1, icon2, textBetween }) {
+      openInfoModal(
+        state,
+        { title, message, icon1, icon2, textBetween, html }
+      ) {
         state.infoModal = {
           title: title,
           message: message,
           icon1: icon1,
           icon2: icon2,
           textBetween: textBetween,
+          html: html,
         };
 
         document.getElementById("infoModal").showModal();

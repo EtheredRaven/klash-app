@@ -16,6 +16,9 @@ const {
 module.exports = async function (Server) {
   const BLOCKS_PROCESSING_INTERVAL =
     process.env.BLOCKS_PROCESSING_INTERVAL || 1000;
+  let lastProcessedBlockId = null;
+  let lastKlashEventTimeout = null;
+  let LAST_KLASH_EVENT_TIMEOUT_DURATION = 4 * 60000; // 4 minutes
   let CURRENT_TEST_BLOCK_HEIGHT = 0;
 
   let processKlashEvents = async function (decodedEvent) {
@@ -75,10 +78,33 @@ module.exports = async function (Server) {
         let decodedEvent = await processingEventRouter.contract.decodeEvent(
           event
         );
+        let isKlashEvent = event.source == Server.klashContractAddress;
+        if (isKlashEvent) {
+          lastKlashEventTimeout && clearTimeout(lastKlashEventTimeout);
+          Server.infoLogging("Clearing sync timeout");
+
+          if (
+            Server.currentTournament &&
+            Server.currentTournament.start_timestamp &&
+            !Server.currentTournament.end_timestamp
+          ) {
+            // If there is a tournament running, set a timeout to sync the db with the blockchain. Used when there is a blockchain rollback and the server is desynced so the game is blocked
+            lastKlashEventTimeout = setTimeout(
+              Server.syncDbWithBlockchain,
+              LAST_KLASH_EVENT_TIMEOUT_DURATION
+            );
+            Server.infoLogging(
+              "Sync timeout set",
+              Date.now(),
+              Date.now() + LAST_KLASH_EVENT_TIMEOUT_DURATION
+            );
+          }
+        }
+
         Server.infoLogging("Processing event", decodedEvent.name);
         await processingEventRouter.processingFunction(decodedEvent);
         Server.infoLogging("Processed event", decodedEvent.name);
-        return event.source == Server.klashContractAddress;
+        return isKlashEvent;
       }
     }
     return false;
@@ -109,6 +135,19 @@ module.exports = async function (Server) {
         }
       }
       Server.infoLogging("Processed block", block.block_height, block.block_id);
+      if (
+        lastProcessedBlockId &&
+        block.block.header.previous != lastProcessedBlockId
+      ) {
+        Server.infoLogging(
+          "Block not in order",
+          block.block_height,
+          block.block_id,
+          block.block.header.previous,
+          lastProcessedBlockId
+        );
+      }
+      lastProcessedBlockId = block.block_id;
     }
 
     // Send the tournament to the admin if it was updated

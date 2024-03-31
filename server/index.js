@@ -63,6 +63,7 @@
 
   require("./src/admin")(Server);
   require("./src/socket")(Server);
+  require("./src/blockchainSync")(Server);
   require("./src/processBlocks")(Server);
   require("./src/dbDataFetching")(Server);
 })();

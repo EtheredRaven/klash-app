@@ -7,5 +7,6 @@ module.exports = async function (Server, eventArgs) {
   );
 
   let updatedMatch = await Server.updateMatchFromDb(eventArgs.match);
+  Server.currentTournament.stats.finishedMatches++;
   Server.emitMatchFinished(updatedMatch);
 };

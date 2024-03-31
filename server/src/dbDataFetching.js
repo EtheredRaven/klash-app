@@ -1,4 +1,5 @@
 const { getUTCTimestamp, fromEventsMatchToDbMatch } = require("./utils");
+const { MATCH_NOT_FINISHED } = require("./constants");
 
 module.exports = async function (Server) {
   Server.updateMatchFromDb = async (match, cachedMatch = false) => {
@@ -118,6 +119,15 @@ module.exports = async function (Server) {
       Server.currentTournament.rounds[
         Server.currentTournament.currentRound - 1
       ].matches = matches;
+
+      Server.currentTournament.stats = {
+        currentRound: Server.currentTournament.currentRound,
+        totalRounds: Server.currentTournament.rounds.length - 1,
+        totalMatches: matches.length,
+        finishedMatches: matches.filter(
+          (match) => match.winner != MATCH_NOT_FINISHED
+        ).length,
+      };
     }
   };
   await Server.updateCurrentTournamentFromDb();

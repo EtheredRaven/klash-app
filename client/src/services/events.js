@@ -17,6 +17,7 @@ export function initSocket(vue) {
   vue.$socket.on("match_created", (match) => {
     vue.$store.dispatch("setCurrentMatch", match);
     vue.$store.commit("setCanPlayTimeout");
+    vue.$store.commit("resetLastRoundSigns");
   });
 
   vue.$socket.on("player_waiting", () => {
@@ -55,6 +56,9 @@ export function initSocket(vue) {
     let userSign = isPlayer1 ? currentMatch.sign_1 : currentMatch.sign_2;
     let winner = COMPUTE_WINNER(userSign, opponentSign);
 
+    let userScore = isPlayer1 ? match.score_1 : match.score_2;
+    let opponentScore = isPlayer1 ? match.score_2 : match.score_1;
+
     let title =
       winner == 0
         ? "It's a draw!"
@@ -69,6 +73,13 @@ export function initSocket(vue) {
     });
 
     vue.$store.dispatch("setCurrentMatch", match);
+    vue.$store.commit("addLastRoundSign", {
+      playerSign: SIGN_INTEGER_TO_STRING(userSign),
+      opponentSign: SIGN_INTEGER_TO_STRING(opponentSign),
+      winner: winner,
+      playerScore: userScore,
+      opponentScore: opponentScore,
+    });
     vue.$store.commit("setCanPlayTimeout");
   });
 
@@ -98,5 +109,9 @@ export function initSocket(vue) {
       });
     }
     vue.$store.commit("setCurrentTournament", tournament);
+  });
+
+  vue.$socket.on("tournament_stats_updated", (stats) => {
+    vue.$store.commit("setCurrentTournamentStats", stats);
   });
 }

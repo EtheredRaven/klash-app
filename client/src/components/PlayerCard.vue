@@ -111,6 +111,8 @@
       },
       async playSign(sign) {
         // Generate a random seed for the sign (uint64)
+        if (this.player.sign_hash)
+          return this.$error("You already played a sign.");
         if (this.cantPlayTimeout)
           return this.$error(
             "You need to wait 30s before trying to send the transaction again."

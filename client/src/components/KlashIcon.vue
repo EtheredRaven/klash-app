@@ -1,5 +1,12 @@
 <template>
-  <div :class="inline ? 'inline-block mx-2 align-middle' : ''">
+  <div
+    :class="{
+      'mx-2': small,
+      'inline-block': inline,
+      'align-middle': !sub,
+      'align-sub': sub,
+    }"
+  >
     <svg
       fill="currentColor"
       :width="size"
@@ -52,6 +59,10 @@
         default: false,
       },
       small: {
+        type: Boolean,
+        default: false,
+      },
+      sub: {
         type: Boolean,
         default: false,
       },

@@ -296,7 +296,6 @@ const estimatedTimeForServerToTimeout = 60000; // 1 minute
           this.$info("You are now logged in as admin", "Welcome");
           this.currentTournament = data.currentTournament;
           this.connected = true;
-          console.log(data.currentTournament);
         } else {
           this.$error("Invalid password", "Error")
         }

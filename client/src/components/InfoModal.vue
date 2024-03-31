@@ -3,6 +3,7 @@
     <div class="modal-box">
       <h3 class="font-bold text-lg text-primary">{{ info.title }}</h3>
       <p class="py-4 tex-secondary">
+        <span v-html="info.html"></span>
         {{ info.message
         }}<KlashIcon v-if="info.icon1" :icon="info.icon1" inline small />{{
           info.textBetween

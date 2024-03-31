@@ -38,11 +38,11 @@ module.exports = function (Server) {
 
         if (canBeTimedOut) {
           try {
-            let { transaction } =
+            /*let { transaction } =
               await Server.klashContract.functions.timeout_player({
                 player: player,
               });
-            await transaction.wait("byBlock", 20000);
+            await transaction.wait("byBlock", 20000);*/
             Server.infoLogging("Player timed out", player);
           } catch (error) {
             Server.errorLogging("Error calling timeout_player", player, error);

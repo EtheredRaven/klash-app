@@ -1,4 +1,5 @@
 const { getUTCTimestamp } = require("../utils");
+const insertTournament = require("../../db/insertTournament");
 
 module.exports = async function (Server, eventArgs) {
   let tournamentConfig = eventArgs.config;
@@ -7,19 +8,32 @@ module.exports = async function (Server, eventArgs) {
     tournamentConfig.tournamentSignUpStart = getUTCTimestamp();
   }
 
-  await Server.db.run(
-    "INSERT OR REPLACE INTO tournaments VALUES (?, ?, ?, ?, ?, ?, ?)",
-    [
-      tournamentConfig.tournamentId,
-      tournamentConfig.config.prize,
-      tournamentConfig.config.signUpDuration,
-      tournamentConfig.tournamentSignUpStart,
-      null,
-      null,
-      null,
-    ]
-  );
+  await insertTournament(Server, tournamentConfig, false);
   await Server.updateCurrentTournamentFromDb();
+
+  let timeoutDuration =
+    parseInt(tournamentConfig.tournamentSignUpStart) +
+    parseInt(tournamentConfig.config.signUpDuration) +
+    1000 -
+    getUTCTimestamp();
+  setTimeout(async () => {
+    try {
+      await Server.klashContract.functions.start_tournament({});
+      Server.infoLogging("Starting tournament", tournamentConfig.tournamentId);
+    } catch (error) {
+      Server.errorLogging(
+        "Error calling start_tournament",
+        tournamentConfig.tournamentId,
+        error
+      );
+    }
+  }, timeoutDuration);
+  Server.infoLogging(
+    "Set timeout for tournament start",
+    tournamentConfig.tournamentId,
+    timeoutDuration
+  );
+
   Server.emitTournamentCreated(Server.currentTournament);
   Server.infoLogging("Created tournament", tournamentConfig.tournamentId);
 };

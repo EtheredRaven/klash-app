@@ -31,7 +31,7 @@
           </div>
 
           <div class="stat">
-            <div class="stat-title">Sign-ups end</div>
+            <div class="stat-title">Tournament start</div>
             <div clas="stat-value">
               <span class="countdown font-mono text-4xl">
                 <span :style="'--value: ' + signUpEndCountdown.h"></span>:
@@ -105,7 +105,7 @@
           "
           class="btn btn-neutral btn-outline no-animation cursor-default inactive-btn btn-wide btn-error"
         >
-          Sign-ups are closed!
+          Tournament has already started!
         </button>
         <button
           class="btn btn-neutral btn-outline no-animation cursor-default inactive-btn btn-wide"
@@ -146,7 +146,7 @@
     },
     computed: {
       currentTournament() {
-        let currentTournament = this.$store.state.currentTournament;
+        let currentTournament = this.$store.state.currentTournament || {};
         return currentTournament;
       },
       activeAccountAddress: function () {
@@ -158,15 +158,21 @@
           .includes(this.activeAccountAddress);
       },
     },
+    created() {
+      this.setUpdateCountdownInterval();
+    },
     watch: {
       currentTournament() {
+        this.setUpdateCountdownInterval();
+      },
+    },
+    methods: {
+      setUpdateCountdownInterval() {
         this.updateCountdown();
         this.updateCountdownInterval &&
           clearInterval(this.updateCountdownInterval);
         this.updateCountdownInterval = setInterval(this.updateCountdown, 50);
       },
-    },
-    methods: {
       updateCountdown() {
         let signUpEndTimestamp =
           this.currentTournament.sign_up_start +

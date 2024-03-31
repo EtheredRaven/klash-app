@@ -105,6 +105,10 @@ module.exports = function (Server) {
   Server.emitMatchFinished = (match) => {
     Server.io.to(match.player_1).emit("match_finished", match);
     Server.io.to(match.player_2).emit("match_finished", match);
+    Server.io.sockets.emit(
+      "tournament_stats_updated",
+      Server.currentTournament.stats
+    );
     Server.infoLogging(
       "Emitting match_finished",
       match.player_1,
@@ -113,15 +117,16 @@ module.exports = function (Server) {
   };
 
   Server.emitMatchCreated = (playerAddress, match, socket = null) => {
-    (socket ? socket : Server.io.to(playerAddress)).emit(
-      "match_created",
-      match
-    );
+    let s = socket ? socket : Server.io.to(playerAddress);
+    s.emit("match_created", match);
+    s.emit("tournament_stats_updated", Server.currentTournament.stats);
     Server.infoLogging("Emitting new_match_created", playerAddress);
   };
 
   Server.emitPlayerWaiting = (playerAddress, socket = null) => {
-    (socket ? socket : Server.io.to(playerAddress)).emit("player_waiting");
+    let s = socket ? socket : Server.io.to(playerAddress);
+    s.emit("player_waiting");
+    s.emit("tournament_stats_updated", Server.currentTournament.stats);
     Server.infoLogging("Emitting player_waiting", playerAddress);
   };
 
