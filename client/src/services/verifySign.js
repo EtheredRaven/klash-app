@@ -11,6 +11,8 @@ export async function verifySign(vue, sign, seed1, seed2) {
       },
       {
         rcLimit: 100000000,
+        payer: window.Client.klashContractAddress,
+        payee: vue.$store.state.activeAccount?.address,
       }
     );
 

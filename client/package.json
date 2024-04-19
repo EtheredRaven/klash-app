@@ -12,6 +12,7 @@
   "dependencies": {
     "crypto-js": "^4.1.1",
     "js-sha256": "^0.11.0",
+    "ethers": "^5.6.2",
     "koilib": "^5.5.4",
     "kondor-js": "^0.4.1",
     "mosha-vue-toastify": "^1.0.23",

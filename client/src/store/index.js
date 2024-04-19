@@ -1,5 +1,6 @@
 import { createStore as createVuexStore } from "vuex";
 import { getKlashContract } from "../utils/contracts";
+import { Signer } from "koilib";
 import CryptoJS from "crypto-js";
 import { sha256 } from "js-sha256";
 import * as kondor from "kondor-js";
@@ -36,9 +37,7 @@ export const createStore = (app) => {
           "-" +
           state.currentMatch.score_2 +
           "-" +
-          state.currentMatch.draws_count +
-          "-" +
-          state.activeAccount.address
+          state.currentMatch.draws_count
         );
       },
       getWalletAsStoredFormat: () => {
@@ -212,9 +211,27 @@ export const createStore = (app) => {
         dispatch("setActiveWallet", wallet);
         await dispatch("setActiveAccount", wallet.accounts[0]);
       },
+      createNewWallet({}) {
+        document.getElementById("connectModal").showModal();
+      },
+      async signInWithPrivateKey({ dispatch }, { privateKey, address }) {
+        await dispatch("setActiveAccount", {
+          name: "PK Account",
+          privateKey,
+          address,
+        });
+      },
       async linkKondor({ state, dispatch }) {
         let accounts;
         try {
+          setTimeout(async () => {
+            // Function to check if Kondor extension exists
+            let timeoutKondorDoesntLoad = setTimeout(() => {
+              dispatch("createNewWallet");
+            }, 500);
+            await kondor.getProvider().getChainId();
+            clearTimeout(timeoutKondorDoesntLoad);
+          }, 0);
           accounts = await kondor.getAccounts();
         } catch (error) {
           app.config.globalProperties.$error(error);
@@ -268,6 +285,9 @@ export const createStore = (app) => {
 
         let newSigner;
 
+        if (!state.activeWallet) {
+          state.activeWallet = { name: "PK Account" };
+        }
         if (state.activeWallet.name == "Kondor") {
           newSigner = kondor.getSigner(newActiveAccount.address);
         } else if (state.activeWallet.name == "WalletConnect") {

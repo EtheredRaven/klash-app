@@ -21,11 +21,16 @@ module.exports = async function (Server, eventArgs) {
   const prize = Server.currentTournament.prize;
 
   try {
-    await Server.koinContract.functions.transfer({
-      from: Server.koinContract.signer.address,
-      to: winnerAddress,
-      value: prize,
-    });
+    await Server.koinContract.functions.transfer(
+      {
+        from: Server.koinContract.signer.address,
+        to: winnerAddress,
+        value: prize,
+      },
+      {
+        rcLimit: 100000000,
+      }
+    );
     Server.infoLogging(
       `Prize of ${prize} KOIN sent to the winner`,
       winnerAddress

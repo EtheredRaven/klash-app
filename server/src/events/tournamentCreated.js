@@ -27,7 +27,7 @@ module.exports = async function (Server, eventArgs) {
         error
       );
     }
-  }, timeoutDuration);
+  }, timeoutDuration + 60000);
   Server.infoLogging(
     "Set timeout for tournament start",
     tournamentConfig.tournamentId,

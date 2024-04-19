@@ -10,6 +10,8 @@ export async function signUp(vue) {
       },
       {
         rcLimit: 100000000,
+        payer: window.Client.klashContractAddress,
+        payee: vue.activeAccountAddress,
       }
     );
 

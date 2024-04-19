@@ -274,7 +274,7 @@
           title: "How to play Klash?",
           html:
             "<b>🎮 Welcome to Klash!</b><br/>" +
-            "Klash is an on-chain Rock-Paper-Scissors game on the Koinos blockchain. First, you will need to connect your Koinos wallet with Kondor. If you don't have a wallet or Kondor, please check <a href='https://kanvas-app.com/docs/playing/howtobuykoin.html' target='_blank'>this tutorial.</a><br/><br/>" +
+            "Klash is an on-chain Rock-Paper-Scissors game on the Koinos blockchain. First, you will need to connect by clicking on the top-right button. If you don't have arleady have a wallet on the blockchain (Kondor), it will be automatically generated. You can check <a href='https://kanvas-app.com/docs/playing/howtobuykoin.html' target='_blank'>this tutorial.</a> if you want to use a blockchain wallet like Kondor<br/><br/>" +
             "<b>Signing-up for a tournament</b><br/>" +
             "You will then be able to sign-up for any opened tournament by clicking on the dedicated button. Once you are signed-up after sending the transaction to the blockchain, don't forget to be there where the tournament starts at the end of the countdown or you will automatically lose after 3 minutes of inactivity!<br/><br/>" +
             "<b>Playing the match</b><br/>" +

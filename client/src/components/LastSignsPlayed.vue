@@ -1,5 +1,5 @@
 <template>
-  <ul class="timeline mt-8">
+  <ul class="timeline mt-8 inline-flex">
     <li v-for="(round, index) in lastSignsPlayed" :key="index">
       <hr v-if="index > 0" />
       <div class="timeline-start mb-2">

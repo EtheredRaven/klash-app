@@ -1,8 +1,9 @@
 <template>
   <div>
+    <span v-if="kondorWallet"></span>
     <button
       class="btn btn-neutral btn-outline no-animation cursor-default inactive-btn"
-      v-if="kondorWallet && activeAccountAddress"
+      v-if="activeAccountAddress"
     >
       {{ shortenAddress(activeAccountAddress) }}
       <span class="cursor-pointer" @click="copyAddress">
@@ -87,7 +88,7 @@
       </span>
     </button>
     <button v-else class="btn btn-neutral" @click="connectToKondor">
-      Connect to Kondor
+      Sign-in
     </button>
   </div>
 </template>

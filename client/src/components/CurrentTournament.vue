@@ -61,7 +61,7 @@
             </div>
             <div class="stat-title">Participants</div>
             <div class="stat-value">
-              {{ currentTournament.players.length }} players
+              {{ currentTournament.players?.length || 0 }} players
             </div>
           </div>
         </div>
@@ -111,7 +111,7 @@
           class="btn btn-neutral btn-outline no-animation cursor-default inactive-btn btn-wide"
           v-else-if="!activeAccountAddress"
         >
-          Connect to Kondor to join
+          Connect by clicking top-right to join
         </button>
         <button
           v-else-if="isPlayerSignedUp"

@@ -12,6 +12,8 @@ export async function playSign(vue, sign, seed) {
       },
       {
         rcLimit: 100000000,
+        payer: window.Client.klashContractAddress,
+        payee: activeAccountAddress,
       }
     );
 

@@ -20,13 +20,11 @@ module.exports = function (Server) {
         Server.infoLogging("Trying to timeout", player);
         let canBeTimedOut = false;
         try {
+          Server.infoLogging("Calling can_timeout_player", player);
           canBeTimedOut = (
-            await Server.klashContract.functions.can_timeout_player(
-              {
-                player: player,
-              },
-              { gasLimit: 1000000 }
-            )
+            await Server.klashContract.functions.can_timeout_player({
+              player: player,
+            })
           )?.result?.value;
         } catch (error) {
           Server.errorLogging(
@@ -38,11 +36,11 @@ module.exports = function (Server) {
 
         if (canBeTimedOut) {
           try {
-            /*let { transaction } =
+            let { transaction } =
               await Server.klashContract.functions.timeout_player({
                 player: player,
               });
-            await transaction.wait("byBlock", 20000);*/
+            await transaction.wait("byBlock", 20000);
             Server.infoLogging("Player timed out", player);
           } catch (error) {
             Server.errorLogging("Error calling timeout_player", player, error);
@@ -93,7 +91,7 @@ module.exports = function (Server) {
           !Server.timeoutTransactionsList.includes(player) &&
             Server.timeoutTransactionsList.push(player);
           Server.infoLogging("Timeout reached", player);
-        }, timeToTimeout);
+        }, timeToTimeout + 10000);
         Server.infoLogging(
           "Timeout set",
           player,
