@@ -1,4 +1,5 @@
 export function formatChainError(err) {
+  console.log(err);
   let error = err;
   error = error.toString().replace("Error: ", "");
   try {

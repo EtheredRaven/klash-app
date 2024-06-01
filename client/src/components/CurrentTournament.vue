@@ -154,7 +154,7 @@
       },
       isPlayerSignedUp() {
         return this.currentTournament.players
-          .map((el) => el.address)
+          ?.map((el) => el.address)
           .includes(this.activeAccountAddress);
       },
     },

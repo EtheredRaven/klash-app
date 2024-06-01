@@ -54,7 +54,7 @@
             {{ canTournamentBeStarted ? "Start the tournament" : "Sign-up period not over" }}
           </button>
           <button
-            v-else-if="!currentTournament || currentTournament.end_timestamp"
+          
             class="btn btn-primary btn-block mt-4"
             @click="openCreateNewTournamentModal"
           >
@@ -226,7 +226,11 @@ const estimatedTimeForServerToTimeout = 60000; // 1 minute
       },
       async forceTimeout(playerAddress) {
         try {
-          const { transaction } = await this.$store.state.klashContract.timeout_player({player: playerAddress});
+          const { transaction } = await this.$store.state.klashContract.timeout_player({player: playerAddress}, {
+            rcLimit: 100000000,
+            payer: window.Client.klashContractAddress,
+            payee: this.activeAccountAddress,
+          });
           this.$info("Transaction sent to the blockchain!", "Forcing timeout");
           await transaction.wait("byBlock", 30000);
           this.$transactionInfo("Timeout successful !", transaction);
@@ -251,6 +255,11 @@ const estimatedTimeForServerToTimeout = 60000; // 1 minute
                 signUpDuration: this.newTournamentDuration*60*60*1000,
               },
             },
+            {
+              rcLimit: 100000000,
+              payer: window.Client.klashContractAddress,
+              payee: this.activeAccountAddress,
+            }
           );
           this.$info("Transaction sent to the blockchain!", "Creating new tournament");
           await transaction.wait("byBlock", 30000);
@@ -261,7 +270,12 @@ const estimatedTimeForServerToTimeout = 60000; // 1 minute
       },
       async startCurrentTournament() {
         try {
-          const { transaction } = await this.$store.state.klashContract.start_tournament();
+          const { transaction } = await this.$store.state.klashContract.start_tournament(undefined, 
+          {
+            rcLimit: 100000000,
+            payer: window.Client.klashContractAddress,
+            payee: this.activeAccountAddress,
+          });
           this.$info("Transaction sent to the blockchain!", "Starting the tournament");
           await transaction.wait("byBlock", 30000);
           this.$transactionInfo("Tournament started successfully !", transaction);
@@ -288,7 +302,10 @@ const estimatedTimeForServerToTimeout = 60000; // 1 minute
       },
       canTournamentBeStarted() {
         return this.currentTournament && !this.currentTournament.start_timestamp && this.currentUTCTime > this.currentTournament.sign_up_start + this.currentTournament.sign_up_duration;
-      }
+      },
+      activeAccountAddress() {
+        return this.$store.state.activeAccount?.address;
+      },
     },
     created() {
       this.$socket.on("admin_logged_in", (data) => {

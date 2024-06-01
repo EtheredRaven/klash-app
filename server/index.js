@@ -19,6 +19,9 @@
   httpServer.listen(Server.httpListeningPort);
   console.log("Http server runnning on port " + Server.httpListeningPort);
 
+  // LOGGING
+  require("./src/logging")(Server);
+
   // HTTPS
   try {
     var httpsServer = require("https").Server(
@@ -39,31 +42,28 @@
       if (req.secure) return next();
       res.redirect("https://" + req.hostname + req.url);
     });
+
+    // DATABASE
+    const DbWrapper = require("./db/db_wrapper");
+    const DbModel = require("./db/db_model");
+    Server.db = new DbWrapper("db/data.db", Server);
+    await new DbModel(Server.db).loadModels();
+
+    // Requirements
+    require("./src/timeouts")(Server);
+    require("./src/contracts")(Server);
+
+    Server.app.use("/", express.static(__dirname + "/../client/dist"));
+    Server.app.get("/*", function (req, res) {
+      res.sendFile(path.resolve(__dirname + "/../client/dist/index.html"));
+    });
+
+    require("./src/admin")(Server);
+    require("./src/socket")(Server);
+    require("./src/blockchainSync")(Server);
+    require("./src/processBlocks")(Server);
+    require("./src/dbDataFetching")(Server);
   } catch (e) {
-    e;
+    Server.errorLogging(e);
   }
-
-  // LOGGING
-  require("./src/logging")(Server);
-
-  // DATABASE
-  const DbWrapper = require("./db/db_wrapper");
-  const DbModel = require("./db/db_model");
-  Server.db = new DbWrapper("db/data.db", Server);
-  await new DbModel(Server.db).loadModels();
-
-  // Requirements
-  require("./src/timeouts")(Server);
-  require("./src/contracts")(Server);
-
-  Server.app.use("/", express.static(__dirname + "/../client/dist"));
-  Server.app.get("/*", function (req, res) {
-    res.sendFile(path.resolve(__dirname + "/../client/dist/index.html"));
-  });
-
-  require("./src/admin")(Server);
-  require("./src/socket")(Server);
-  require("./src/blockchainSync")(Server);
-  require("./src/processBlocks")(Server);
-  require("./src/dbDataFetching")(Server);
 })();

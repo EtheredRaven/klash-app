@@ -19,7 +19,10 @@
             Please wait for the next round to start...</span
           >
           <span v-else-if="currentMatch.winner > 1">
-            <span v-if="hasWon"
+            <span v-if="isTournamentWinner"
+              >🏆 Congratulations! You won the tournament !</span
+            >
+            <span v-else-if="hasWon"
               ><span class="text-success font-bold">😊 You won!</span><br />
               <span class="loading loading-dots loading-md mt-3"></span
               ><br />Waiting for the next round to start...</span
@@ -167,6 +170,7 @@
           s: 0,
         },
         updateCountdownInterval: null,
+        audio: null,
       };
     },
     computed: {
@@ -175,6 +179,9 @@
       },
       currentMatch() {
         return this.$store.state.currentMatch || {};
+      },
+      currentTournament() {
+        return this.$store.state.currentTournament || {};
       },
       activeAccountAddress: function () {
         return this.$store.state.activeAccount?.address;
@@ -190,6 +197,12 @@
           (this.currentMatch.winner == MATCH_PLAYER_1_WON && this.isPlayer1) ||
           (!this.isPlayer1 && this.currentMatch.winner == MATCH_PLAYER_2_WON);
         return ret;
+      },
+      isTournamentWinner() {
+        return (
+          this.currentTournament.winner ==
+          this.$store.state.activeAccount?.address
+        );
       },
       players() {
         let player1 = {
@@ -292,8 +305,18 @@
       },
       playTheme() {
         // Play the theme song
-        const audio = new Audio("/theme.mp3");
-        audio.play();
+        // Check if the audio element already exists
+        if (!this.audio) {
+          this.audio = new Audio("/theme.mp3");
+        }
+        // Check if the audio is playing
+        if (!this.audio.paused) {
+          // If it is playing, pause and reset the current time to 0
+          this.audio.pause();
+          this.audio.currentTime = 0;
+        }
+        // Play the audio from the beginning
+        this.audio.play();
         this.$store.commit("openInfoModal", {
           title: "Klash! Klash! Klash!",
           html:

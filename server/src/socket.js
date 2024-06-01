@@ -1,6 +1,6 @@
 module.exports = function (Server) {
   Server.io.engine.on("connection_error", (err) => {
-    Server.errorLogging(err);
+    Server.errorLogging("Connection error", err);
   });
 
   Server.adminsSockets = [];

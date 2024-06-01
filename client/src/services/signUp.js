@@ -1,10 +1,8 @@
 import { formatChainError } from "../utils/formatting.js";
 
 export async function signUp(vue) {
-  const klash = vue.$store.state.klashContract;
-
   try {
-    const { transaction } = await klash.sign_up(
+    const { transaction } = await vue.$store.state.klashContract.sign_up(
       {
         from: vue.activeAccountAddress,
       },
