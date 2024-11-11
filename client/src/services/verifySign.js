@@ -1,19 +1,30 @@
 import { formatChainError } from "../utils/formatting.js";
+import { presignAndSendTx } from "../utils/HDKoinos.js";
 
 export async function verifySign(vue, sign, seed1, seed2) {
+  let activeAccountAddress = vue.$store.state.activeAccount?.address;
+
   try {
-    const { transaction } = await vue.$store.state.klashContract.verify_sign(
+    const { operation } =
+      await vue.$store.state.klashContract.functions.verify_sign(
+        {
+          from: activeAccountAddress,
+          sign,
+          randomSeed_1: seed1,
+          randomSeed_2: seed2,
+        },
+        {
+          onlyOperation: true,
+        }
+      );
+    const { transaction } = await presignAndSendTx(
+      operation,
       {
-        from: vue.$store.state.activeAccount?.address,
-        sign,
-        randomSeed_1: seed1,
-        randomSeed_2: seed2,
-      },
-      {
-        rcLimit: 100000000,
         payer: window.Client.klashContractAddress,
-        payee: vue.$store.state.activeAccount?.address,
-      }
+        payee: activeAccountAddress,
+        rcLimit: 100000000,
+      },
+      vue.$store.state.klashContract
     );
 
     vue.$info("Your sign unveiling has been sent to the blockchain");

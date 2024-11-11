@@ -32,6 +32,10 @@ module.exports = function (Server) {
       Server.unlinkSocketToAddress(socket);
     });
 
+    socket.on("get_tournament_data", function () {
+      Server.emitTournamentUpdated(Server.currentTournament, socket);
+    });
+
     Server.initAdminSocketEvents(socket);
 
     socket.on("disconnect", function (reason) {
@@ -69,6 +73,12 @@ module.exports = function (Server) {
   Server.emitTournamentCreated = (tournament) => {
     Server.io.sockets.emit("tournament_created", tournament);
     Server.infoLogging("Emitting tournament_created", tournament.id);
+  };
+
+  Server.emitTournamentUpdated = (tournament, socket = null) => {
+    let s = socket ? socket : Server.io.sockets;
+    s.emit("tournament_updated", tournament);
+    Server.infoLogging("Emitting tournament_updated", tournament.id, s);
   };
 
   Server.emitPlayerSignedUp = (playerAddress) => {

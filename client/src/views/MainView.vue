@@ -8,74 +8,155 @@
     "
   >
     <LocalSync />
-    <div class="flex flex-col mt-28">
-      <TournamentStats />
-      <PlayerCard v-if="!currentMatch.waiting" :player="opponentObject" />
-      <div class="stat mb-8">
-        <div class="stat-title">
-          <span v-if="currentMatch.waiting">
-            <span class="loading loading-dots loading-md"></span><br />
-            You automatically won this round due to a odd number of players.
-            Please wait for the next round to start...</span
-          >
-          <span v-else-if="currentMatch.winner > 1">
-            <span v-if="isTournamentWinner"
-              >🏆 Congratulations! You won the tournament !</span
-            >
-            <span v-else-if="hasWon"
-              ><span class="text-success font-bold">😊 You won!</span><br />
-              <span class="loading loading-dots loading-md mt-3"></span
-              ><br />Waiting for the next round to start...</span
-            >
-            <span v-else
-              ><span class="text-error font-bold">🙁 You lost!</span><br />Try
-              again in the next tournament!</span
-            >
-          </span>
-          <span v-else-if="!userObject.sign_hash || !opponentObject.sign_hash">
-            {{ getMatchInfoSentence() }}
-          </span>
-          <button
-            class="btn btn-primary mb-4"
-            v-else-if="!userObject.sign"
-            @click="unveilSign"
-          >
-            <svg
-              width="24px"
-              height="24px"
-              viewBox="0 0 48 48"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path d="M0 0h48v48H0z" fill="none" />
-              <g id="Shopicon">
-                <circle cx="24" cy="24" r="4" />
-                <path
-                  d="M24,38c12,0,20-14,20-14s-8-14-20-14S4,24,4,24S12,38,24,38z M24,16c4.418,0,8,3.582,8,8s-3.582,8-8,8s-8-3.582-8-8
-		S19.582,16,24,16z"
-                />
-              </g>
-            </svg>
-            Unveil your sign
-          </button>
-          <span v-else-if="!opponentObject.sign">
-            Waiting for your opponent to unveil his sign...
-          </span>
-          <span v-else>Match is being resolved...</span>
-        </div>
+    <div v-if="!currentMatch.waiting && currentMatch.winner > 1">
+      <div
+        class="h-screen flex items-center justify-center flex-col"
+        v-if="isTournamentWinner"
+      >
+        <ConfettiExplosion />
         <div
-          class="stat-value"
-          v-if="currentMatch.winner <= 1 && !currentMatch.waiting"
+          class="card items-center text-center shadow-lg bg-base-100 mb-8 w-fit mx-auto"
         >
-          <span class="countdown font-mono text-2xl">
-            <span :style="'--value: ' + nextStepCountdown.h"></span>:
-            <span :style="'--value: ' + nextStepCountdown.m"></span>:
-            <span :style="'--value: ' + nextStepCountdown.s"></span>
-          </span>
+          <h2 class="card-title mt-8 text-3xl">🏆 Victory !</h2>
+          <div class="card-body">
+            <div class="stats stats-vertical lg:stats-horizontal">
+              <div class="stat icon-left">
+                <div class="stat-figure">
+                  <svg
+                    width="36px"
+                    height="36px"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M21 12.4984L14 12.4984M3 12.4984L10 12.4984M7 4.5V19.4984M17 4.5V19.4984M6.2 19.5H17.8C18.9201 19.5 19.4802 19.5 19.908 19.282C20.2843 19.0903 20.5903 18.7843 20.782 18.408C21 17.9802 21 17.4201 21 16.3V10.9C21 8.65979 21 7.53968 20.564 6.68404C20.1805 5.93139 19.5686 5.31947 18.816 4.93597C17.9603 4.5 16.8402 4.5 14.6 4.5H9.4C7.15979 4.5 6.03968 4.5 5.18404 4.93597C4.43139 5.31947 3.81947 5.93139 3.43597 6.68404C3 7.53968 3 8.65979 3 10.9V16.3C3 17.4201 3 17.9802 3.21799 18.408C3.40973 18.7843 3.71569 19.0903 4.09202 19.282C4.51984 19.5 5.07989 19.5 6.2 19.5ZM10 10.4984H14V14.4984H10V10.4984Z"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                </div>
+                <div class="stat-title">Prize won</div>
+                <div class="stat-value">
+                  {{ currentTournament.prize / 100000000 }} $KOIN
+                </div>
+              </div>
+
+              <div class="stat">
+                <div class="stat-title">Duration</div>
+                <div clas="stat-value">
+                  <span class="countdown font-mono text-4xl">
+                    <span :style="'--value: ' + tournamentDuration.h"></span>:
+                    <span :style="'--value: ' + tournamentDuration.m"></span>:
+                    <span :style="'--value: ' + tournamentDuration.s"></span>
+                  </span>
+                </div>
+              </div>
+
+              <div class="stat">
+                <div class="stat-figure">
+                  <svg
+                    width="36px"
+                    height="36px"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M14 19.2857L15.8 21L20 17M16.5 14.4018C16.2052 14.2315 15.8784 14.1098 15.5303 14.0472C15.4548 14.0337 15.3748 14.024 15.2842 14.0171C15.059 14 14.9464 13.9915 14.7961 14.0027C14.6399 14.0143 14.5527 14.0297 14.4019 14.0723C14.2569 14.1132 13.9957 14.2315 13.4732 14.4682C12.7191 14.8098 11.8817 15 11 15C10.1183 15 9.28093 14.8098 8.52682 14.4682C8.00429 14.2315 7.74302 14.1131 7.59797 14.0722C7.4472 14.0297 7.35983 14.0143 7.20361 14.0026C7.05331 13.9914 6.94079 14 6.71575 14.0172C6.6237 14.0242 6.5425 14.0341 6.46558 14.048C5.23442 14.2709 4.27087 15.2344 4.04798 16.4656C4 16.7306 4 17.0485 4 17.6841V19.4C4 19.9601 4 20.2401 4.10899 20.454C4.20487 20.6422 4.35785 20.7951 4.54601 20.891C4.75992 21 5.03995 21 5.6 21H10.5M15 7C15 9.20914 13.2091 11 11 11C8.79086 11 7 9.20914 7 7C7 4.79086 8.79086 3 11 3C13.2091 3 15 4.79086 15 7Z"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                </div>
+                <div class="stat-title">Players eliminated</div>
+                <div class="stat-value">
+                  {{ (currentTournament.players?.length || 0) - 1 }} players
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      <PlayerCard :player="userObject" :waiting="currentMatch.waiting" />
+      <div v-else-if="!hasWon">
+        <TournamentOverview :admin="false"></TournamentOverview>
+      </div>
     </div>
-    <LastSignsPlayed />
+    <div v-else>
+      <div class="flex flex-col mt-28">
+        <TournamentStats />
+        <PlayerCard v-if="!currentMatch.waiting" :player="opponentObject" />
+        <div class="stat mb-8">
+          <div class="stat-title">
+            <span v-if="currentMatch.waiting">
+              <span class="loading loading-dots loading-md"></span><br />
+              You automatically won this round due to a odd number of players.
+              Please wait for the next round to start...</span
+            >
+            <span v-else-if="currentMatch.winner > 1">
+              <span v-if="isTournamentWinner"
+                >🏆 Congratulations! You won the tournament !</span
+              >
+              <span v-else-if="hasWon"
+                ><span class="text-success font-bold">😊 You won!</span><br />
+                <span class="loading loading-dots loading-md mt-3"></span
+                ><br />Waiting for the next round to start...</span
+              >
+              <span v-else
+                ><span class="text-error font-bold">🙁 You lost!</span><br />Try
+                again in the next tournament!</span
+              >
+            </span>
+            <span
+              v-else-if="!userObject.sign_hash || !opponentObject.sign_hash"
+            >
+              {{ getMatchInfoSentence() }}
+            </span>
+            <button
+              class="btn btn-primary mb-4"
+              v-else-if="!userObject.sign"
+              @click="unveilSign"
+            >
+              <svg
+                width="24px"
+                height="24px"
+                viewBox="0 0 48 48"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path d="M0 0h48v48H0z" fill="none" />
+                <g id="Shopicon">
+                  <circle cx="24" cy="24" r="4" />
+                  <path
+                    d="M24,38c12,0,20-14,20-14s-8-14-20-14S4,24,4,24S12,38,24,38z M24,16c4.418,0,8,3.582,8,8s-3.582,8-8,8s-8-3.582-8-8
+      S19.582,16,24,16z"
+                  />
+                </g>
+              </svg>
+              Unveil your sign
+            </button>
+            <span v-else-if="!opponentObject.sign">
+              Waiting for your opponent to unveil his sign...
+            </span>
+            <span v-else>Match is being resolved...</span>
+          </div>
+          <div
+            class="stat-value"
+            v-if="currentMatch.winner <= 1 && !currentMatch.waiting"
+          >
+            <span class="countdown font-mono text-2xl">
+              <span :style="'--value: ' + nextStepCountdown.h"></span>:
+              <span :style="'--value: ' + nextStepCountdown.m"></span>:
+              <span :style="'--value: ' + nextStepCountdown.s"></span>
+            </span>
+          </div>
+        </div>
+        <PlayerCard :player="userObject" :waiting="currentMatch.waiting" />
+      </div>
+      <LastSignsPlayed />
+    </div>
   </div>
   <div v-else class="flex flex-col mt-24 m-auto w-fit">
     <div class="absolute top-4 left-4">
@@ -141,6 +222,8 @@
   import LocalSync from "../components/LocalSync.vue";
   import TournamentStats from "../components/TournamentStats.vue";
   import KlashIcon from "../components/KlashIcon.vue";
+  import TournamentOverview from "../components/TournamentOverview.vue";
+  import ConfettiExplosion from "vue-confetti-explosion";
 
   import {
     MATCH_PLAYER_1_WON,
@@ -158,6 +241,8 @@
       LocalSync,
       TournamentStats,
       KlashIcon,
+      TournamentOverview,
+      ConfettiExplosion,
     },
     created() {
       this.setCountdown();
@@ -181,6 +266,7 @@
         return this.$store.state.currentMatch || {};
       },
       currentTournament() {
+        console.log(this.$store.state.currentTournament);
         return this.$store.state.currentTournament || {};
       },
       activeAccountAddress: function () {
@@ -236,6 +322,12 @@
         let ret = this.players.opponent;
         ret.isOpponent = true;
         return ret || {};
+      },
+      tournamentDuration() {
+        return getRemainingTime(
+          this.currentTournament.end_timestamp,
+          this.currentTournament.start_timestamp
+        );
       },
     },
     methods: {

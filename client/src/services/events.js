@@ -91,7 +91,7 @@ export function initSocket(vue) {
     let title = hasWon ? "You won the match!" : "You lost the match!";
     let message = hasWon
       ? "Congratulations 🎉 Please, wait for the next round to start !"
-      : "Tough battle, but there’s always a next time! 🤝";
+      : "Tough battle, but there’s always a next time! 🤝 You can now follow the tournament with the dashboard !";
     vue.$store.commit("openInfoModal", {
       title,
       message,

@@ -31,7 +31,7 @@
  * - index for signers (when change = 1)
  */
 
-import { Signer } from "koilib";
+import { Signer, Transaction } from "koilib";
 import { ethers } from "ethers";
 
 const KOINOS_PATH = "m/44'/659'/";
@@ -97,6 +97,24 @@ export class HDKoinos {
       keyPath: `${KOINOS_PATH}${accIndex}'/1/${signerIndex}`,
     });
   }
+}
+
+export async function presignAndSendTx(operation, options, klashContract) {
+  const tx = new Transaction({
+    signer: klashContract.signer, // signer from kondor
+    provider: klashContract.provider,
+    options,
+  });
+  let randomSigner = Signer.fromWif(
+    new HDKoinos(HDKoinos.randomMnemonic()).deriveKeyAccount(0).privateKey,
+    true
+  );
+  await tx.pushOperation(operation);
+  await tx.prepare();
+  await randomSigner.signTransaction(tx.transaction);
+  await tx.sign(); // With Kondor
+  await tx.send();
+  return tx;
 }
 
 export default HDKoinos;

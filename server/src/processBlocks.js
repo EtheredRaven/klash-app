@@ -152,14 +152,7 @@ module.exports = async function (Server) {
 
     // Send the tournament to the admin if it was updated
     if (updateTournament) {
-      Server.adminsSockets.forEach((socket) => {
-        socket.emit("admin_tournament_updated", Server.currentTournament);
-        Server.infoLogging(
-          socket,
-          "Emitting admin_tournament_updated",
-          Server.currentTournament.id
-        );
-      });
+      Server.emitTournamentUpdated(Server.currentTournament);
     }
   };
 

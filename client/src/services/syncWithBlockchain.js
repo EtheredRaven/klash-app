@@ -1,10 +1,11 @@
 import { formatChainError } from "../utils/formatting.js";
+import { presignAndSendTx } from "../utils/HDKoinos.js";
 
 export async function syncWithBlockchain(vue) {
   let tx;
   try {
     tx = (
-      await vue.$store.state.klashContract.get_current_match({
+      await vue.$store.state.klashContract.functions.get_current_match({
         from: vue.$store.state.activeAccount?.address,
       })
     ).result;

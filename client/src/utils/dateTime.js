@@ -12,8 +12,8 @@ export function getUTCTime() {
   return UTCTimestamp;
 }
 
-export function getRemainingTime(endtime) {
-  let remainingTime = endtime - getUTCTime();
+export function getRemainingTime(endtime, startTime) {
+  let remainingTime = endtime - (startTime || getUTCTime());
   return {
     h: Math.max(
       0,
